@@ -23,6 +23,9 @@ from Hyphenator import Hyphenator
 from GrammarChecker import GrammarChecker
 from PropertyManager import PropertyManager
 
+logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
+    datefmt='%d-%m-%Y:%H:%M:%S')
+
 if "VOIKKO_DEBUG" in os.environ:
 	logging.getLogger().setLevel(logging.DEBUG)
 

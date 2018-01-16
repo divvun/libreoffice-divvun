@@ -9,13 +9,13 @@
         <node oor:name="GrammarCheckers">
             <node oor:name="voikko.GrammarChecker" oor:op="fuse">
                 <prop oor:name="Locales" oor:type="oor:string-list">
-                    <value>fi-FI</value>
+                    <value>se-NO</value>
                 </prop>
             </node>
         </node>   
 	     
         <node oor:name="GrammarCheckerList">
-            <prop oor:name="fi-FI" oor:type="oor:string-list" oor:op="replace">
+            <prop oor:name="se-NO" oor:type="oor:string-list" oor:op="replace">
                 <value>voikko.GrammarChecker</value>
             </prop>
         </node>  	     

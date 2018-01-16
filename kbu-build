@@ -1,0 +1,33 @@
+#!/bin/bash
+
+# To run with full debug output, and without opening a window:
+# $ PYUNO_LOGLEVEL=ARGS ./kbu-build --headless
+
+
+### PYTHONPATH doesn't seem to be necessary as long as the libdivvun
+### files are in oxt/pythonpath and mentioned in the SRC_AND_DIST
+### variable in Makefile:
+# export PYTHONPATH="$PWD/oxt/pythonpath:$PYTHONPATH"
+
+set -e -u
+
+cp ~/src/divvun-suggest/python/libdivvun.py oxt/pythonpath/
+cp ~/src/divvun-suggest/python/_libdivvun.cpython-36m-x86_64-linux-gnu.so oxt/pythonpath/
+
+make
+make oxt
+( unopkg remove org.puimula.ooovoikko || echo meh )
+unopkg add -f build/voikko.oxt
+
+### Used by voikko when we want debug output:
+export VOIKKO_DEBUG=1
+
+lowriter "$@" fin.odt 2>&1 | awk '
+    { color="" }
+    $3 ~ /\[CALL,tid/{color="38;2;205;92;92"  }
+    $2 == "INFO"     {color="38;2;175;175;135"}
+    $2 == "DEBUG"    {color="38;2;100;149;237"}
+    $2 == "WARNING"  {color="38;5;161"        }
+    color { printf "\033["color"m%s\033[0m\n", $0; next }
+          { print }
+'

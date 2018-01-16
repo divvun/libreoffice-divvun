@@ -423,6 +423,7 @@ class VoikkoHandlePool:
 	def __getSupportedLocalesForOperation(self, localeList, localeOperation):
 		# optimization: if we already have found some locales, don't search for more
 		if len(localeList) == 0:
+			logging.info("dictionary path %s", self.getDictionaryPath())
 			languages = localeOperation(self.getDictionaryPath())
 			for lang in languages:
 				self.__addLocale(localeList, lang)
@@ -435,7 +436,10 @@ class VoikkoHandlePool:
 		return self.__getSupportedLocalesForOperation(self.__supportedHyphenationLocales, Voikko.listSupportedHyphenationLanguages)
 
 	def getSupportedGrammarLocales(self):
-		return self.__getSupportedLocalesForOperation(self.__supportedGrammarCheckingLocales, Voikko.listSupportedGrammarCheckingLanguages)
+		def listSupportedGCLangs(path):
+			return ["se"] + Voikko.listSupportedGrammarCheckingLanguages(path)
+		logging.info("supported gc locales: %s", self.__getSupportedLocalesForOperation(self.__supportedGrammarCheckingLocales, listSupportedGCLangs))
+		return self.__getSupportedLocalesForOperation(self.__supportedGrammarCheckingLocales, listSupportedGCLangs)
 
 	def getInitializationStatus(self):
 		"""Returns initialization status diagnostics"""

@@ -39,7 +39,7 @@ DESTDIR=/usr/lib/libreoffice-voikko
 ifdef SystemRoot # Windows
 	COPYDIR=xcopy /E /I
 	COPY=copy
-	PS="\"
+	PS="\\"
 	MKDIR=mkdir
 else
 	COPYDIR=cp -r
@@ -61,6 +61,8 @@ endif
 SRC_AND_DIST=config.xcu config.xcs icon.png SettingsDialog.xdl SettingsDialog_en_US.properties \
              SettingsDialog_fi_FI.properties SettingsDialog_en_US.default SettingsDialog.xcu Linguistic.xcu \
              voikko.components META-INF/manifest.xml lovoikko.py \
+             pythonpath/libdivvun.py \
+             pythonpath/_libdivvun.cpython-36m-x86_64-linux-gnu.so \
              pythonpath/SettingsEventHandler.py pythonpath/SpellChecker.py pythonpath/VoikkoHandlePool.py \
              pythonpath/SpellAlternatives.py pythonpath/PropertyManager.py pythonpath/Hyphenator.py \
              pythonpath/HyphenatedWord.py pythonpath/PossibleHyphens.py pythonpath/GrammarChecker.py
