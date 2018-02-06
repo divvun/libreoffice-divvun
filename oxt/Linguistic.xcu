@@ -7,7 +7,7 @@
     <node oor:name="ServiceManager">
 
         <node oor:name="GrammarCheckers">
-            <node oor:name="voikko.GrammarChecker" oor:op="fuse">
+            <node oor:name="divvun.GrammarChecker" oor:op="fuse">
                 <prop oor:name="Locales" oor:type="oor:string-list">
                     <value>se-NO</value>
                 </prop>
@@ -16,7 +16,7 @@
 	     
         <node oor:name="GrammarCheckerList">
             <prop oor:name="se-NO" oor:type="oor:string-list" oor:op="replace">
-                <value>voikko.GrammarChecker</value>
+                <value>divvun.GrammarChecker</value>
             </prop>
         </node>  	     
 

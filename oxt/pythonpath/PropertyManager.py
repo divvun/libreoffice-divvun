@@ -1,4 +1,4 @@
-# Libreoffice-voikko: Linguistic extension for LibreOffice
+# Libreoffice-divvun: Linguistic extension for LibreOffice
 # Copyright (C) 2015 Harri Pitkänen <hatapitk@iki.fi>
 #
 # This Source Code Form is subject to the terms of the Mozilla Public License,
@@ -15,7 +15,7 @@ import os
 import sys
 import locale
 import uno
-from VoikkoHandlePool import VoikkoHandlePool
+from DivvunHandlePool import DivvunHandlePool
 from com.sun.star.beans import XPropertyChangeListener, UnknownPropertyException, PropertyValue
 from com.sun.star.linguistic2 import LinguServiceEvent
 from com.sun.star.linguistic2.LinguServiceEventFlags import SPELL_CORRECT_WORDS_AGAIN, SPELL_WRONG_WORDS_AGAIN, HYPHENATE_AGAIN, PROOFREAD_AGAIN
@@ -24,7 +24,7 @@ class PropertyManager(unohelper.Base, XPropertyChangeListener):
 
 	def __init__(self):
 		self.__messageLanguage = "en_US"
-		VoikkoHandlePool.getInstance().setInstallationPath(self.__getInstallationPath())
+		DivvunHandlePool.getInstance().setInstallationPath(self.__getInstallationPath())
 		logging.debug("PropertyManager.__init__")
 		self.__linguPropSet = None
 		self.__hyphMinLeading = 2
@@ -34,12 +34,12 @@ class PropertyManager(unohelper.Base, XPropertyChangeListener):
 		self.__hyphUnknownWords = True
 		self.__linguEventListeners = {}
 		try:
-			dictVariant = self.readFromRegistry("/org.puimula.ooovoikko.Config/dictionary", "variant")
-			VoikkoHandlePool.getInstance().setPreferredGlobalVariant(dictVariant)
+			dictVariant = self.readFromRegistry("/no.divvun.gramcheck.Config/dictionary", "variant")
+			DivvunHandlePool.getInstance().setPreferredGlobalVariant(dictVariant)
 			logging.debug("Initial dictionary variant '" + dictVariant + "'")
 		except UnknownPropertyException as e:
 			logging.debug("Setting initial dictionary variant to default")
-			VoikkoHandlePool.getInstance().setPreferredGlobalVariant("")
+			DivvunHandlePool.getInstance().setPreferredGlobalVariant("")
 		self.initialize()
 
 	def propertyChange(self, evt):
@@ -68,14 +68,14 @@ class PropertyManager(unohelper.Base, XPropertyChangeListener):
 		logging.debug("PropertyManager.initialize: starting")
 		self.__setUiLanguage()
 
-		VoikkoHandlePool.getInstance().setGlobalBooleanOption(PropertyManager.VOIKKO_OPT_IGNORE_DOT, True)
-		VoikkoHandlePool.getInstance().setGlobalBooleanOption(PropertyManager.VOIKKO_OPT_NO_UGLY_HYPHENATION, True)
+		DivvunHandlePool.getInstance().setGlobalBooleanOption(PropertyManager.DIVVUN_OPT_IGNORE_DOT, True)
+		DivvunHandlePool.getInstance().setGlobalBooleanOption(PropertyManager.DIVVUN_OPT_NO_UGLY_HYPHENATION, True)
 
 		# Set these options globally until OOo bug #97945 is resolved.
-		VoikkoHandlePool.getInstance().setGlobalBooleanOption(PropertyManager.VOIKKO_OPT_ACCEPT_TITLES_IN_GC, True)
-		VoikkoHandlePool.getInstance().setGlobalBooleanOption(PropertyManager.VOIKKO_OPT_ACCEPT_BULLETED_LISTS_IN_GC, True)
+		DivvunHandlePool.getInstance().setGlobalBooleanOption(PropertyManager.DIVVUN_OPT_ACCEPT_TITLES_IN_GC, True)
+		DivvunHandlePool.getInstance().setGlobalBooleanOption(PropertyManager.DIVVUN_OPT_ACCEPT_BULLETED_LISTS_IN_GC, True)
 
-		VoikkoHandlePool.getInstance().setGlobalBooleanOption(PropertyManager.VOIKKO_OPT_ACCEPT_UNFINISHED_PARAGRAPHS_IN_GC, True)
+		DivvunHandlePool.getInstance().setGlobalBooleanOption(PropertyManager.DIVVUN_OPT_ACCEPT_UNFINISHED_PARAGRAPHS_IN_GC, True)
 
 		compContext = uno.getComponentContext()
 		servManager = compContext.ServiceManager
@@ -86,7 +86,7 @@ class PropertyManager(unohelper.Base, XPropertyChangeListener):
 
 		# synchronize the local settings from global preferences
 		self.__setProperties(self.__linguPropSet)
-		self.readVoikkoSettings()
+		self.readDivvunSettings()
 		# request that all users of linguistic services run the spellchecker and hyphenator
 		# again with updated settings
 		event = LinguServiceEvent()
@@ -116,12 +116,12 @@ class PropertyManager(unohelper.Base, XPropertyChangeListener):
 			return True
 		return False
 
-	def readVoikkoSettings(self):
+	def readDivvunSettings(self):
 		try:
-			self.__hyphWordParts = self.readFromRegistry("/org.puimula.ooovoikko.Config/hyphenator", "hyphWordParts")
-			self.__hyphUnknownWords = self.readFromRegistry("/org.puimula.ooovoikko.Config/hyphenator", "hyphUnknownWords")
+			self.__hyphWordParts = self.readFromRegistry("/no.divvun.gramcheck.Config/hyphenator", "hyphWordParts")
+			self.__hyphUnknownWords = self.readFromRegistry("/no.divvun.gramcheck.Config/hyphenator", "hyphUnknownWords")
 		except UnknownPropertyException as e:
-			logging.exception("PropertyManager.readVoikkoSettings", e)
+			logging.exception("PropertyManager.readDivvunSettings", e)
 		self.__syncHyphenatorSettings()
 
 	def __getInstallationPath(self):
@@ -144,29 +144,29 @@ class PropertyManager(unohelper.Base, XPropertyChangeListener):
 	def getMessageLanguage(self):
 		return self.__messageLanguage
 
-	def reloadVoikkoSettings(self):
-		voikko = VoikkoHandlePool.getInstance()
+	def reloadDivvunSettings(self):
+		divvun = DivvunHandlePool.getInstance()
 		event = LinguServiceEvent()
 		event.nEvent = 0
 		try:
-			hyphWordParts = self.readFromRegistry("/org.puimula.ooovoikko.Config/hyphenator", "hyphWordParts")
+			hyphWordParts = self.readFromRegistry("/no.divvun.gramcheck.Config/hyphenator", "hyphWordParts")
 			if hyphWordParts != self.__hyphWordParts:
 				event.nEvent = event.nEvent | HYPHENATE_AGAIN
 				self.__hyphWordParts = hyphWordParts
 
-			hyphUnknownWords = self.readFromRegistry("/org.puimula.ooovoikko.Config/hyphenator", "hyphUnknownWords")
+			hyphUnknownWords = self.readFromRegistry("/no.divvun.gramcheck.Config/hyphenator", "hyphUnknownWords")
 			if hyphUnknownWords != self.__hyphUnknownWords:
 				event.nEvent = event.nEvent | HYPHENATE_AGAIN
 				self.__hyphUnknownWords = hyphUnknownWords
 
-			dictVariant = self.readFromRegistry("/org.puimula.ooovoikko.Config/dictionary", "variant")
+			dictVariant = self.readFromRegistry("/no.divvun.gramcheck.Config/dictionary", "variant")
 			if dictVariant is None or dictVariant == "":
-				dictVariant = voikko.getPreferredGlobalVariant()
-			if dictVariant != voikko.getPreferredGlobalVariant():
+				dictVariant = divvun.getPreferredGlobalVariant()
+			if dictVariant != divvun.getPreferredGlobalVariant():
 				event.nEvent =  event.nEvent | SPELL_CORRECT_WORDS_AGAIN | SPELL_WRONG_WORDS_AGAIN | PROOFREAD_AGAIN
-				voikko.setPreferredGlobalVariant(dictVariant)
+				divvun.setPreferredGlobalVariant(dictVariant)
 		except UnknownPropertyException as e:
-			logging.exception("PropertyManager.reloadVoikkoSettings", e)
+			logging.exception("PropertyManager.reloadDivvunSettings", e)
 		self.__syncHyphenatorSettings()
 		self.__sendLinguEvent(event)
 
@@ -190,9 +190,9 @@ class PropertyManager(unohelper.Base, XPropertyChangeListener):
 
 	def setValue(self, value):
 		if value.Name == "IsSpellWithDigits":
-			VoikkoHandlePool.getInstance().setGlobalBooleanOption(PropertyManager.VOIKKO_OPT_IGNORE_NUMBERS, not value.Value)
+			DivvunHandlePool.getInstance().setGlobalBooleanOption(PropertyManager.DIVVUN_OPT_IGNORE_NUMBERS, not value.Value)
 		elif value.Name == "IsSpellUpperCase":
-			VoikkoHandlePool.getInstance().setGlobalBooleanOption(PropertyManager.VOIKKO_OPT_IGNORE_UPPERCASE, not value.Value)
+			DivvunHandlePool.getInstance().setGlobalBooleanOption(PropertyManager.DIVVUN_OPT_IGNORE_UPPERCASE, not value.Value)
 		elif value.Name == "HyphMinLeading":
 			if value.Value is not None:
 				self.__hyphMinLeading = value.Value
@@ -208,10 +208,10 @@ class PropertyManager(unohelper.Base, XPropertyChangeListener):
 
 	def __syncHyphenatorSettings(self):
 		if self.__hyphWordParts:
-			VoikkoHandlePool.getInstance().setGlobalIntegerOption(PropertyManager.VOIKKO_MIN_HYPHENATED_WORD_LENGTH, self.__hyphMinWordLength)
+			DivvunHandlePool.getInstance().setGlobalIntegerOption(PropertyManager.DIVVUN_MIN_HYPHENATED_WORD_LENGTH, self.__hyphMinWordLength)
 		else:
-			VoikkoHandlePool.getInstance().setGlobalIntegerOption(PropertyManager.VOIKKO_MIN_HYPHENATED_WORD_LENGTH, 2)
-		VoikkoHandlePool.getInstance().setGlobalBooleanOption(PropertyManager.VOIKKO_OPT_HYPHENATE_UNKNOWN_WORDS, self.__hyphUnknownWords)
+			DivvunHandlePool.getInstance().setGlobalIntegerOption(PropertyManager.DIVVUN_MIN_HYPHENATED_WORD_LENGTH, 2)
+		DivvunHandlePool.getInstance().setGlobalBooleanOption(PropertyManager.DIVVUN_OPT_HYPHENATE_UNKNOWN_WORDS, self.__hyphUnknownWords)
 
 	def __sendLinguEvent(self, event):
 		logging.debug("PropertyManager.sendLinguEvent")
@@ -240,12 +240,12 @@ class PropertyManager(unohelper.Base, XPropertyChangeListener):
 
 PropertyManager.instance = None
 PropertyManager.loadingFailed = False
-PropertyManager.VOIKKO_OPT_IGNORE_NUMBERS = 1
-PropertyManager.VOIKKO_OPT_IGNORE_UPPERCASE = 3
-PropertyManager.VOIKKO_MIN_HYPHENATED_WORD_LENGTH = 9
-PropertyManager.VOIKKO_OPT_HYPHENATE_UNKNOWN_WORDS = 15
-PropertyManager.VOIKKO_OPT_IGNORE_DOT = 0
-PropertyManager.VOIKKO_OPT_NO_UGLY_HYPHENATION = 4
-PropertyManager.VOIKKO_OPT_ACCEPT_TITLES_IN_GC = 13
-PropertyManager.VOIKKO_OPT_ACCEPT_BULLETED_LISTS_IN_GC = 16
-PropertyManager.VOIKKO_OPT_ACCEPT_UNFINISHED_PARAGRAPHS_IN_GC = 14
+PropertyManager.DIVVUN_OPT_IGNORE_NUMBERS = 1
+PropertyManager.DIVVUN_OPT_IGNORE_UPPERCASE = 3
+PropertyManager.DIVVUN_MIN_HYPHENATED_WORD_LENGTH = 9
+PropertyManager.DIVVUN_OPT_HYPHENATE_UNKNOWN_WORDS = 15
+PropertyManager.DIVVUN_OPT_IGNORE_DOT = 0
+PropertyManager.DIVVUN_OPT_NO_UGLY_HYPHENATION = 4
+PropertyManager.DIVVUN_OPT_ACCEPT_TITLES_IN_GC = 13
+PropertyManager.DIVVUN_OPT_ACCEPT_BULLETED_LISTS_IN_GC = 16
+PropertyManager.DIVVUN_OPT_ACCEPT_UNFINISHED_PARAGRAPHS_IN_GC = 14

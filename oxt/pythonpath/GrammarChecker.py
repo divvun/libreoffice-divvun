@@ -1,4 +1,4 @@
-# Libreoffice-voikko: Linguistic extension for LibreOffice
+# Libreoffice-divvun: Linguistic extension for LibreOffice
 # Copyright (C) 2015 Harri Pitkänen <hatapitk@iki.fi>
 #
 # This Source Code Form is subject to the terms of the Mozilla Public License,
@@ -15,7 +15,7 @@ from com.sun.star.linguistic2 import XProofreader, ProofreadingResult, SinglePro
 from com.sun.star.lang import XServiceInfo, XInitialization, XServiceDisplayName
 from com.sun.star.beans import PropertyValue
 from com.sun.star.text.TextMarkupType import PROOFREADING
-from VoikkoHandlePool import VoikkoHandlePool
+from DivvunHandlePool import DivvunHandlePool
 from PropertyManager import PropertyManager
 import libdivvun
 
@@ -43,11 +43,11 @@ class GrammarChecker(unohelper.Base, XServiceInfo, XProofreader, XInitialization
 
 	# From XSupportedLocales
 	def getLocales(self):
-		return VoikkoHandlePool.getInstance().getSupportedGrammarLocales()
+		return DivvunHandlePool.getInstance().getSupportedGrammarLocales()
 
 	def hasLocale(self, aLocale):
-		logging.info("haslocale %s for %s", VoikkoHandlePool.getInstance().supportsGrammarLocale(aLocale), aLocale)
-		return VoikkoHandlePool.getInstance().supportsGrammarLocale(aLocale)
+		logging.info("haslocale %s for %s", DivvunHandlePool.getInstance().supportsGrammarLocale(aLocale), aLocale)
+		return DivvunHandlePool.getInstance().supportsGrammarLocale(aLocale)
 
 	# From XProofreader
 	def isSpellChecker(self):
@@ -119,17 +119,17 @@ class GrammarChecker(unohelper.Base, XServiceInfo, XProofreader, XInitialization
 		logging.info("return result, errors: %d", len(result.aErrors))
 		return result
 
-		VoikkoHandlePool.mutex.acquire()
+		DivvunHandlePool.mutex.acquire()
 		try:
-			voikko = VoikkoHandlePool.getInstance().getHandle(aLocale)
-			if voikko is None:
-				logging.error("GrammarChecker.doProofreading called without initializing libvoikko")
+			divvun = DivvunHandlePool.getInstance().getHandle(aLocale)
+			if divvun is None:
+				logging.error("GrammarChecker.doProofreading called without initializing libdivvun")
 				return result
 
 			gcErrors = []
 			gcI = 0
 			vErrorCount = 0
-			for vError in voikko.grammarErrors(aText, PropertyManager.getInstance().getMessageLanguage()):
+			for vError in divvun.grammarErrors(aText, PropertyManager.getInstance().getMessageLanguage()):
 				startPos = vError.startPos
 				errorLength = vError.errorLen
 
@@ -161,7 +161,7 @@ class GrammarChecker(unohelper.Base, XServiceInfo, XProofreader, XInitialization
 
 				detailUrl = PropertyValue()
 				detailUrl.Name = "FullCommentURL"
-				detailUrl.Value = "http://voikko.puimula.org/gchelp/fi/" + ruleIdentifier + ".html"
+				detailUrl.Value = "http://divvun.puimula.org/gchelp/fi/" + ruleIdentifier + ".html"
 				gcError.aProperties = (detailUrl,)
 
 				# add suggestions
@@ -172,7 +172,7 @@ class GrammarChecker(unohelper.Base, XServiceInfo, XProofreader, XInitialization
 			result.nStartOfNextSentencePosition = result.nBehindEndOfSentencePosition
 			return result
 		finally:
-			VoikkoHandlePool.mutex.release()
+			DivvunHandlePool.mutex.release()
 
 	def ignoreRule(self, ruleIdentifier, locale):
 		self.__ignoredErrors.add(ruleIdentifier)
@@ -187,9 +187,9 @@ class GrammarChecker(unohelper.Base, XServiceInfo, XProofreader, XInitialization
 	# From XServiceDisplayName
 	def getServiceDisplayName(self, locale):
 		if locale.Language == "fi":
-			return "Kieliopin tarkistus (Voikko)"
+			return "Kieliopin tarkistus (Divvun)"
 		else:
-			return "Grammar checker (Voikko)"
+			return "Grammar checker (Divvun)"
 
-GrammarChecker.IMPLEMENTATION_NAME = "voikko.GrammarChecker"
+GrammarChecker.IMPLEMENTATION_NAME = "divvun.GrammarChecker"
 GrammarChecker.SUPPORTED_SERVICE_NAMES = ("com.sun.star.linguistic2.Proofreader",)

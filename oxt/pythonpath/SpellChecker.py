@@ -1,4 +1,4 @@
-# Libreoffice-voikko: Linguistic extension for LibreOffice
+# Libreoffice-divvun: Linguistic extension for LibreOffice
 # Copyright (C) 2015 Harri Pitkänen <hatapitk@iki.fi>
 #
 # This Source Code Form is subject to the terms of the Mozilla Public License,
@@ -13,7 +13,7 @@ import logging
 import unohelper
 from com.sun.star.linguistic2 import XSpellChecker, XLinguServiceEventBroadcaster
 from com.sun.star.lang import XServiceInfo, XInitialization, XServiceDisplayName
-from VoikkoHandlePool import VoikkoHandlePool
+from DivvunHandlePool import DivvunHandlePool
 from SpellAlternatives import SpellAlternatives
 from PropertyManager import PropertyManager
 
@@ -34,64 +34,64 @@ class SpellChecker(unohelper.Base, XServiceInfo, XSpellChecker, XLinguServiceEve
 
 	# From XSupportedLocales
 	def getLocales(self):
-		return VoikkoHandlePool.getInstance().getSupportedSpellingLocales()
+		return DivvunHandlePool.getInstance().getSupportedSpellingLocales()
 
 	def hasLocale(self, aLocale):
-		return VoikkoHandlePool.getInstance().supportsSpellingLocale(aLocale)
+		return DivvunHandlePool.getInstance().supportsSpellingLocale(aLocale)
 
 	# From XSpellChecker
 	def isValid(self, word, locale, properties):
-		VoikkoHandlePool.mutex.acquire()
+		DivvunHandlePool.mutex.acquire()
 		try:
-			voikko = VoikkoHandlePool.getInstance().getHandle(locale)
-			if voikko is None:
+			divvun = DivvunHandlePool.getInstance().getHandle(locale)
+			if divvun is None:
 				return False
 			PropertyManager.getInstance().setValues(properties)
-			result = voikko.spell(word)
+			result = divvun.spell(word)
 			PropertyManager.getInstance().resetValues(properties)
 			return result
 		finally:
-			VoikkoHandlePool.mutex.release()
+			DivvunHandlePool.mutex.release()
 
 	def spell(self, word, locale, properties):
 		# Check if diagnostic message should be returned
-		if word == "VoikkoGetStatusInformation":
-			suggestions = [VoikkoHandlePool.getInstance().getInitializationStatus()]
+		if word == "DivvunGetStatusInformation":
+			suggestions = [DivvunHandlePool.getInstance().getInitializationStatus()]
 			return SpellAlternatives(word, suggestions, locale)
 		
-		VoikkoHandlePool.mutex.acquire()
+		DivvunHandlePool.mutex.acquire()
 		try:
-			voikko = VoikkoHandlePool.getInstance().getHandle(locale)
-			if voikko is None:
+			divvun = DivvunHandlePool.getInstance().getHandle(locale)
+			if divvun is None:
 				return None
 
 			PropertyManager.getInstance().setValues(properties)
-			if voikko.spell(word):
+			if divvun.spell(word):
 				PropertyManager.getInstance().resetValues(properties)
 				return None
-			suggestions = voikko.suggest(word)
+			suggestions = divvun.suggest(word)
 			PropertyManager.getInstance().resetValues(properties)
 			return SpellAlternatives(word, suggestions, locale)
 		finally:
-			VoikkoHandlePool.mutex.release()
+			DivvunHandlePool.mutex.release()
 
 	# From XLinguServiceEventBroadcaster
 	def addLinguServiceEventListener(self, xLstnr):
 		logging.debug("SpellChecker.addLinguServiceEventListener")
-		VoikkoHandlePool.mutex.acquire()
+		DivvunHandlePool.mutex.acquire()
 		try:
 			return PropertyManager.getInstance().addLinguServiceEventListener(xLstnr)
 		finally:
-			VoikkoHandlePool.mutex.release()
+			DivvunHandlePool.mutex.release()
 
 
 	def removeLinguServiceEventListener(self, xLstnr):
 		logging.debug("SpellChecker.removeLinguServiceEventListener")
-		VoikkoHandlePool.mutex.acquire()
+		DivvunHandlePool.mutex.acquire()
 		try:
 			return PropertyManager.getInstance().removeLinguServiceEventListener(xLstnr)
 		finally:
-			VoikkoHandlePool.mutex.release()
+			DivvunHandlePool.mutex.release()
 
 	# From XInitialization
 	def initialize(self, seq):
@@ -100,9 +100,9 @@ class SpellChecker(unohelper.Base, XServiceInfo, XSpellChecker, XLinguServiceEve
 	# From XServiceDisplayName
 	def getServiceDisplayName(self, locale):
 		if locale.Language == "fi":
-			return "Oikoluku (Voikko)"
+			return "Oikoluku (Divvun)"
 		else:
-			return "Spellchecker (Voikko)"
+			return "Spellchecker (Divvun)"
 
-SpellChecker.IMPLEMENTATION_NAME = "voikko.SpellChecker"
+SpellChecker.IMPLEMENTATION_NAME = "divvun.SpellChecker"
 SpellChecker.SUPPORTED_SERVICE_NAMES = ("com.sun.star.linguistic2.SpellChecker",)

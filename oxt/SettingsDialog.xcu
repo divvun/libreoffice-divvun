@@ -7,19 +7,19 @@
   <node oor:name="Nodes">
     <node oor:name="LanguageSettings" oor:op="fuse">
       <node oor:name="Leaves">
-        <node oor:name="org.puimula.ooovoikko.Settings" oor:op="fuse">
+        <node oor:name="no.divvun.gramcheck.Settings" oor:op="fuse">
           <prop oor:name="Id">
-            <value>org.puimula.ooovoikko</value>
+            <value>no.divvun.gramcheck</value>
           </prop>
           <prop oor:name="Label">
-            <value xml:lang="en-US">Voikko</value>
-            <value xml:lang="fi">Voikko</value>
+            <value xml:lang="en-US">Divvun</value>
+            <value xml:lang="fi">Divvun</value>
           </prop>
           <prop oor:name="OptionsPage">
             <value>%origin%/SettingsDialog.xdl</value>
           </prop>
           <prop oor:name="EventHandlerService">
-            <value>org.puimula.ooovoikko.SettingsEventHandlerImplementation</value>
+            <value>no.divvun.gramcheck.SettingsEventHandlerImplementation</value>
           </prop>
         </node>
       </node>

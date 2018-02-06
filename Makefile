@@ -1,4 +1,4 @@
-# Libreoffice-voikko: Linguistic extension for LibreOffice
+# Libreoffice-divvun: Linguistic extension for LibreOffice
 # Copyright (C) 2005 - 2015 Harri Pitkänen <hatapitk@iki.fi>
 #
 # This Source Code Form is subject to the terms of the Mozilla Public License,
@@ -12,8 +12,8 @@
 
 # ===== Build settings =====
 
-# Version number of the libreoffice-voikko extension
-VOIKKO_VERSION=5.0
+# Version number of the libreoffice-divvun extension
+DIVVUN_VERSION=5.0
 
 # If you want to have a license text to be displayed upon the installation
 # of this extension, uncomment the following.
@@ -26,11 +26,11 @@ VOIKKO_VERSION=5.0
 
 # Destination directory when installing unpacked extension with
 # make install-unpacked
-DESTDIR=/usr/lib/libreoffice-voikko
+DESTDIR=/usr/lib/libreoffice-divvun
 
 # Uncomment the following if you want to build a standalone extension.
-# Files to be delivered with the extension must be placed under directory voikko/
-# and libvoikko.py under oxt/pythonpath/
+# Files to be delivered with the extension must be placed under directory divvun/
+# and libdivvun.py under oxt/pythonpath/
 # STANDALONE_EXTENSION=1
 
 # === End build settings ===
@@ -53,15 +53,15 @@ FIND=find
 
 # Build extension package name
 ifdef SHOW_UGLY_WARNINGS
-        VOIKKO_PACKAGENAME:=tekstintuho
+        DIVVUN_PACKAGENAME:=tekstintuho
 else
-        VOIKKO_PACKAGENAME:=voikko
+        DIVVUN_PACKAGENAME:=divvun
 endif
 
 SRC_AND_DIST=config.xcu config.xcs icon.png SettingsDialog.xdl SettingsDialog_en_US.properties \
              SettingsDialog_fi_FI.properties SettingsDialog_en_US.default SettingsDialog.xcu Linguistic.xcu \
-             voikko.components META-INF/manifest.xml lovoikko.py \
-             pythonpath/SettingsEventHandler.py pythonpath/SpellChecker.py pythonpath/VoikkoHandlePool.py \
+             divvun.components META-INF/manifest.xml lodivvun.py \
+             pythonpath/SettingsEventHandler.py pythonpath/SpellChecker.py pythonpath/DivvunHandlePool.py \
              pythonpath/SpellAlternatives.py pythonpath/PropertyManager.py pythonpath/Hyphenator.py \
              pythonpath/HyphenatedWord.py pythonpath/PossibleHyphens.py pythonpath/GrammarChecker.py
 SRCDIST=COPYING Makefile README ChangeLog oxt/description.xml.template \
@@ -75,8 +75,8 @@ ifdef SHOW_LICENSE
 endif
 
 ifdef STANDALONE_EXTENSION
-	STANDALONE_EXTENSION_FILES=$(shell find voikko -type f '!' -name '.*' '!' -path 'voikko*/.*')
-	COPY_TEMPLATES+=pythonpath/libvoikko.py
+	STANDALONE_EXTENSION_FILES=$(shell find divvun -type f '!' -name '.*' '!' -path 'divvun*/.*')
+	COPY_TEMPLATES+=pythonpath/libdivvun.py
 else
 	STANDALONE_EXTENSION_FILES=
 endif
@@ -91,7 +91,7 @@ EXTENSION_FILES=build/oxt/description.xml \
 extension-files : $(EXTENSION_FILES)
 
 oxt: $(EXTENSION_FILES)
-	cd build/oxt && $(ZIP) -r -9 ../$(VOIKKO_PACKAGENAME).oxt \
+	cd build/oxt && $(ZIP) -r -9 ../$(DIVVUN_PACKAGENAME).oxt \
 	   $(patsubst build/oxt/%,%,$^)
 
 all: oxt
@@ -104,12 +104,12 @@ install-unpacked: extension-files
 	               $(patsubst %,build/oxt/%,$(COPY_TEMPLATES)) $(DESTDIR)
 
 # Sed scripts for modifying templates
-DESCRIPTION_SEDSCRIPT:=s/VOIKKO_VERSION/$(VOIKKO_VERSION)/g
+DESCRIPTION_SEDSCRIPT:=s/DIVVUN_VERSION/$(DIVVUN_VERSION)/g
 ifdef SHOW_LICENSE
 	DESCRIPTION_SEDSCRIPT:=$(DESCRIPTION_SEDSCRIPT);/SHOW_LICENSE/d
 endif
 ifdef SHOW_UGLY_WARNINGS
-	DESCRIPTION_SEDSCRIPT:=$(DESCRIPTION_SEDSCRIPT);s/Voikko/TEKSTINTUHO/g
+	DESCRIPTION_SEDSCRIPT:=$(DESCRIPTION_SEDSCRIPT);s/Divvun/TEKSTINTUHO/g
 endif
 DESCRIPTION_SEDSCRIPT:="$(DESCRIPTION_SEDSCRIPT)"
 
@@ -128,18 +128,18 @@ $(patsubst %,build/oxt/%,$(STANDALONE_EXTENSION_FILES)): build/oxt/%: %
 
 
 # Rules for creating the source distribution
-dist-gzip: libreoffice-voikko-$(VOIKKO_VERSION).tar.gz
+dist-gzip: libreoffice-divvun-$(DIVVUN_VERSION).tar.gz
 
-libreoffice-voikko-$(VOIKKO_VERSION).tar.gz: $(patsubst %,libreoffice-voikko-$(VOIKKO_VERSION)/%, \
+libreoffice-divvun-$(DIVVUN_VERSION).tar.gz: $(patsubst %,libreoffice-divvun-$(DIVVUN_VERSION)/%, \
 	                                      $(sort $(SRCDIST)))
-	tar c --group 0 --owner 0 libreoffice-voikko-$(VOIKKO_VERSION) | gzip -9 > $@
+	tar c --group 0 --owner 0 libreoffice-divvun-$(DIVVUN_VERSION) | gzip -9 > $@
 
-$(patsubst %,libreoffice-voikko-$(VOIKKO_VERSION)/%, $(sort $(SRCDIST))): \
-	libreoffice-voikko-$(VOIKKO_VERSION)/%: %
+$(patsubst %,libreoffice-divvun-$(DIVVUN_VERSION)/%, $(sort $(SRCDIST))): \
+	libreoffice-divvun-$(DIVVUN_VERSION)/%: %
 	install --mode=644 -D $^ $@
 
 
 # The clean target
 clean:
-	rm -rf build libreoffice-voikko-$(VOIKKO_VERSION)
-	rm -f libreoffice-voikko-$(VOIKKO_VERSION).tar.gz
+	rm -rf build libreoffice-divvun-$(DIVVUN_VERSION)
+	rm -f libreoffice-divvun-$(DIVVUN_VERSION).tar.gz

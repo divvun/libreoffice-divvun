@@ -1,4 +1,4 @@
-# Libreoffice-voikko: Linguistic extension for LibreOffice
+# Libreoffice-divvun: Linguistic extension for LibreOffice
 # Copyright (C) 2015 Harri Pitkänen <hatapitk@iki.fi>
 #
 # This Source Code Form is subject to the terms of the Mozilla Public License,
@@ -16,7 +16,7 @@ from com.sun.star.lang import XServiceInfo
 from com.sun.star.awt import XContainerWindowEventHandler
 from com.sun.star.beans import UnknownPropertyException
 from PropertyManager import PropertyManager
-from VoikkoHandlePool import VoikkoHandlePool
+from DivvunHandlePool import DivvunHandlePool
 from libvoikko import Voikko
 
 class SettingsEventHandler(unohelper.Base, XServiceInfo, XContainerWindowEventHandler):
@@ -41,7 +41,7 @@ class SettingsEventHandler(unohelper.Base, XServiceInfo, XContainerWindowEventHa
 			return False
 		if eventObject == "ok":
 			self.__saveOptionsFromWindowToRegistry(xWindow)
-			PropertyManager.getInstance().reloadVoikkoSettings()
+			PropertyManager.getInstance().reloadDivvunSettings()
 			return True
 		if eventObject == "back" or eventObject == "initialize":
 			self.__initOptionsWindowFromRegistry(xWindow)
@@ -56,8 +56,8 @@ class SettingsEventHandler(unohelper.Base, XServiceInfo, XContainerWindowEventHa
 		hyphWordPartsValue = False
 		hyphUnknownWordsValue = True
 		try:
-			hyphWordPartsValue = PropertyManager.getInstance().readFromRegistry("/org.puimula.ooovoikko.Config/hyphenator",  "hyphWordParts")
-			hyphUnknownWordsValue = PropertyManager.getInstance().readFromRegistry("/org.puimula.ooovoikko.Config/hyphenator", "hyphUnknownWords")
+			hyphWordPartsValue = PropertyManager.getInstance().readFromRegistry("/no.divvun.gramcheck.Config/hyphenator",  "hyphWordParts")
+			hyphUnknownWordsValue = PropertyManager.getInstance().readFromRegistry("/no.divvun.gramcheck.Config/hyphenator", "hyphUnknownWords")
 		except UnknownPropertyException as e:
 			logging.exception("SettingsEventHandler: UnknownPropertyException", e)
 			return
@@ -84,14 +84,14 @@ class SettingsEventHandler(unohelper.Base, XServiceInfo, XContainerWindowEventHa
 		hyphUnknownWordsProps = hyphUnknownWords.getModel()
 		hyphUnknownWordsValue = hyphUnknownWordsProps.getPropertyValue("State") # 0 = unchecked, 1 = checked
 
-		rootView = PropertyManager.getRegistryProperties("/org.puimula.ooovoikko.Config/hyphenator")
+		rootView = PropertyManager.getRegistryProperties("/no.divvun.gramcheck.Config/hyphenator")
 		rootView.setHierarchicalPropertyValue("hyphWordParts", hyphWordPartsValue == 1)
 		rootView.setHierarchicalPropertyValue("hyphUnknownWords", hyphUnknownWordsValue == 1)
 		rootView.commitChanges()
 
 		# dictionary variant
 		variantValue = self.__getSelectedVariant(window)
-		rootView = PropertyManager.getRegistryProperties("/org.puimula.ooovoikko.Config/dictionary")
+		rootView = PropertyManager.getRegistryProperties("/no.divvun.gramcheck.Config/dictionary")
 		rootView.setHierarchicalPropertyValue("variant", variantValue)
 		rootView.commitChanges()
 
@@ -106,7 +106,7 @@ class SettingsEventHandler(unohelper.Base, XServiceInfo, XContainerWindowEventHa
 		# read selected dictionary variant from registry
 		registryVariantValue = "standard"
 		try:
-			registryVariantValue = PropertyManager.getInstance().readFromRegistry("/org.puimula.ooovoikko.Config/dictionary", "variant")
+			registryVariantValue = PropertyManager.getInstance().readFromRegistry("/no.divvun.gramcheck.Config/dictionary", "variant")
 		except UnknownPropertyException as e:
 			logging.exception(e)
 			return
@@ -121,7 +121,7 @@ class SettingsEventHandler(unohelper.Base, XServiceInfo, XContainerWindowEventHa
 		uno.invoke(variantProps, "setPropertyValue", ("SelectedItems", uno.Any("[]short", tuple(selectedValues))))
 
 	def __initAvailableVariants(self):
-		dicts = Voikko.listDicts(VoikkoHandlePool.getInstance().getDictionaryPath())
+		dicts = Voikko.listDicts(DivvunHandlePool.getInstance().getDictionaryPath())
 		self.__dictionaryVariantList = []
 		for vDict in dicts:
 			dictName = vDict.variant + ": " + vDict.description
@@ -145,5 +145,5 @@ class SettingsEventHandler(unohelper.Base, XServiceInfo, XContainerWindowEventHa
 		return "standard"
 
 
-SettingsEventHandler.IMPLEMENTATION_NAME = "org.puimula.ooovoikko.SettingsEventHandlerImplementation"
-SettingsEventHandler.SUPPORTED_SERVICE_NAMES = ("org.puimula.ooovoikko.SettingsEventHandlerService",)
+SettingsEventHandler.IMPLEMENTATION_NAME = "no.divvun.gramcheck.SettingsEventHandlerImplementation"
+SettingsEventHandler.SUPPORTED_SERVICE_NAMES = ("no.divvun.gramcheck.SettingsEventHandlerService",)

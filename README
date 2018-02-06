@@ -1,7 +1,7 @@
 What is this?
 =============
-This is libreoffice-voikko, a multi language spellchecker, grammar checker and
-hyphenator extension for LibreOffice. It uses libvoikko for all linguistic operations.
+This is libreoffice-divvun, a multi language spellchecker, grammar checker and
+hyphenator extension for LibreOffice. It uses libdivvun for all linguistic operations.
 
 
 License
@@ -23,7 +23,7 @@ Porting status
 ==============
 - Linux: This is the primary development platform, and should always work
 - Other platforms: The extension is platform independent Python code and should
-  work as long as libvoikko is available for the platform.
+  work as long as libdivvun is available for the platform.
 
 Platform identifiers to be used as directory names for native libraries on some of
 the common platforms are:
@@ -35,14 +35,14 @@ Requirements
 ============
 
 - LibreOffice 4.1 or later (must come with Python 3 or later)
-- Libvoikko version 3.8.1 or later.
+- libdivvun-gramcheck
 - Make, sed, find and zip for packaging.
 
 Instructions for packaging
 ==========================
 
 - Install all of the required software listed above.
-- Run "make oxt". This will build the extensions package voikko.oxt under
+- Run "make oxt". This will build the extensions package divvun.oxt under
   subdirectory build.
   * There are some settings available that can be used to customize the build.
     Please see "build settings" in Makefile. You may change any of these settings
@@ -55,12 +55,12 @@ Supported Make targets
 - extension-files
     Builds the extension files under build/oxt.
 - oxt
-    Builds the extensions package voikko.oxt under subdirectory build.
+    Builds the extensions package divvun.oxt under subdirectory build.
 - all
     Same as 'oxt'.
 - install-unpacked DESTDIR=some_directory
     Installs the unpacked extension under directory DESTDIR. Default
-    for DESTDIR is /usr/lib/libreoffice-voikko.
+    for DESTDIR is /usr/lib/libreoffice-divvun.
 - dist-gzip
     Builds the source package.
 - clean
@@ -73,20 +73,20 @@ Diagnostic tools
 Setting environment variable PYUNO_LOGLEVEL=ARGS before starting LibreOffice
 causes debug information from PyUNO to be printed to stderr.
 
-Setting environment variable VOIKKO_DEBUG to any value before starting
+Setting environment variable DIVVUN_DEBUG to any value before starting
 LibreOffice causes debug output from this extension to be printed to stderr.
 
 To debug possible initialization errors in production builds, try listing
-spelling suggestions for string "VoikkoGetStatusInformation". This will
+spelling suggestions for string "DivvunGetStatusInformation". This will
 return a string that contains all successfully initialized languages
-and failed initializations along with error messages from libvoikko.
+and failed initializations along with error messages from libdivvun.
 
 
 Bug reports and patches
 =======================
 
 Patches and bug reports can be sent to the author (hatapitk@iki.fi). The web
-site for libreoffice-voikko is located at http://voikko.puimula.org
+site for libreoffice-divvun is located at http://divvun.no
 
 
 Change history

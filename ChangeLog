@@ -1,3 +1,7 @@
+2018-02-06  Kevin Brubeck Unhammer  <unhammer@fsfe.org>
+	* Fork libreoffice-voikko to into libreoffice-divvun
+	* WIP: remove dependency on voikko
+
 2015-09-24 Harri Pitkänen <hatapitk@iki.fi>
 	* Re-write the extension code in Python instead of C++.
 

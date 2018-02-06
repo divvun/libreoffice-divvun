@@ -1,4 +1,4 @@
-# Libreoffice-voikko: Linguistic extension for LibreOffice
+# Libreoffice-divvun: Linguistic extension for LibreOffice
 # Copyright (C) 2015 Harri Pitkänen <hatapitk@iki.fi>
 #
 # This Source Code Form is subject to the terms of the Mozilla Public License,
@@ -323,7 +323,7 @@ BCP_ADVERTISE_WITHOUT_COUNTRY = [
 	"tau"
 ]
 
-class VoikkoHandlePool:
+class DivvunHandlePool:
 
 	def __init__(self):
 		self.__supportedSpellingLocales = []
@@ -341,27 +341,27 @@ class VoikkoHandlePool:
 		self.__bcpAdvertiseWithoutCountry = set(BCP_ADVERTISE_WITHOUT_COUNTRY)
 
 	def getInstance():
-		if VoikkoHandlePool.instance is None:
-			VoikkoHandlePool.instance = VoikkoHandlePool()
-		return VoikkoHandlePool.instance
+		if DivvunHandlePool.instance is None:
+			DivvunHandlePool.instance = DivvunHandlePool()
+		return DivvunHandlePool.instance
 	getInstance = staticmethod(getInstance)
 
 	def getInstallationPath(self):
 		return self.__installationPath
 
 	def getDictionaryPath(self):
-		return os.path.join(self.getInstallationPath(), "voikko")
+		return os.path.join(self.getInstallationPath(), "divvun")
 
 	def __openHandleWithVariant(self, language, fullVariant):
-		logging.debug("VoikkoHandlePool.__openHandleWithVariant")
+		logging.debug("DivvunHandlePool.__openHandleWithVariant")
 		try:
-			voikkoHandle = Voikko(fullVariant, self.getDictionaryPath())
-			self.__handles[language] = voikkoHandle
+			divvunHandle = Voikko(fullVariant, self.getDictionaryPath())
+			self.__handles[language] = divvunHandle
 			for booleanOpt, booleanValue in self.__globalBooleanOptions.items():
-				voikkoHandle.setBooleanOption(booleanOpt, booleanValue)
+				divvunHandle.setBooleanOption(booleanOpt, booleanValue)
 			for integerOpt, integerValue in self.__globalIntegerOptions.items():
-				voikkoHandle.setIntegerOption(integerOpt, integerValue)
-			return voikkoHandle;
+				divvunHandle.setIntegerOption(integerOpt, integerValue)
+			return divvunHandle;
 		except VoikkoException as e:
 			self.__initializationErrors[language] = e.args[0]
 			return None
@@ -459,8 +459,8 @@ class VoikkoHandlePool:
 
 	def setInstallationPath(self, path):
 		self.__installationPath = path
-		searchPath = os.path.join(path, "voikko", platform.system() + "-" + "-".join(platform.architecture()))
-		logging.debug("VoikkoHandlePool.setInstallationPath: library search path is " + searchPath)
+		searchPath = os.path.join(path, "divvun", platform.system() + "-" + "-".join(platform.architecture()))
+		logging.debug("DivvunHandlePool.setInstallationPath: library search path is " + searchPath)
 		Voikko.setLibrarySearchPath(searchPath)
 
 	def getPreferredGlobalVariant(self):
@@ -492,5 +492,5 @@ class VoikkoHandlePool:
 	def supportsGrammarLocale(self, locale):
 		return self.__containsLocale(locale, self.getSupportedGrammarLocales())
 
-VoikkoHandlePool.instance = None
-VoikkoHandlePool.mutex = RLock()
+DivvunHandlePool.instance = None
+DivvunHandlePool.mutex = RLock()

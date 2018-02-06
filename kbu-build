@@ -4,10 +4,13 @@
 # $ PYUNO_LOGLEVEL=ARGS ./kbu-build --headless
 
 
-### PYTHONPATH doesn't seem to be necessary as long as the libdivvun
-### files are in oxt/pythonpath and mentioned in the SRC_AND_DIST
-### variable in Makefile:
-# export PYTHONPATH="$PWD/oxt/pythonpath:$PYTHONPATH"
+### PYTHONPATH doesn't seem to be necessary if the libdivvun files are
+### in oxt/pythonpath and mentioned in the SRC_AND_DIST variable in
+### Makefile. OTOH, we need the C lib available too, and libdivvun
+### installs that, so might as well keep them separate.
+
+export LD_LIBRARY_PATH="$HOME/PREFIX/gtd-gc/lib"
+export PYTHONPATH="$HOME/PREFIX/gtd-gc/lib/python3.6/site-packages"
 
 set -e -u
 
@@ -17,13 +20,13 @@ set -e -u
 make clean
 make
 make oxt
-( unopkg remove org.puimula.ooovoikko || echo meh )
-unopkg add -f build/voikko.oxt
+( unopkg remove no.divvun.gramcheck || echo meh )
+unopkg add -f build/divvun.oxt
 
-### Used by voikko when we want debug output:
-export VOIKKO_DEBUG=1
+### Used by divvun when we want debug output:
+export DIVVUN_DEBUG=1
 
-lowriter "$@" fin.odt 2>&1 | awk '
+lowriter "$@" sme.odt 2>&1 | awk '
     { color="" }
     $3 ~ /\[CALL,tid/{color="38;2;205;92;92"  }
     $3 ~ /\[CALL,tid/ && $5 ~ /except/ {color="37;1;205;92;91"  }

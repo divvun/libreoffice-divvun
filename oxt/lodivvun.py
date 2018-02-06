@@ -1,4 +1,4 @@
-# Libreoffice-voikko: Linguistic extension for LibreOffice
+# Libreoffice-divvun: Linguistic extension for LibreOffice
 # Copyright (C) 2015 Harri Pitkänen <hatapitk@iki.fi>
 #
 # This Source Code Form is subject to the terms of the Mozilla Public License,
@@ -26,21 +26,21 @@ from PropertyManager import PropertyManager
 logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
     datefmt='%d-%m-%Y:%H:%M:%S')
 
-if "VOIKKO_DEBUG" in os.environ:
+if "DIVVUN_DEBUG" in os.environ:
 	logging.getLogger().setLevel(logging.DEBUG)
 
 def messageBox(messageText):
 	ctx = uno.getComponentContext()
 	sManager = ctx.ServiceManager
 	toolkit = sManager.createInstance("com.sun.star.awt.Toolkit")
-	msgbox = toolkit.createMessageBox(None, ERRORBOX, BUTTONS_OK, "Error initializing Voikko", messageText)
+	msgbox = toolkit.createMessageBox(None, ERRORBOX, BUTTONS_OK, "Error initializing Divvun", messageText)
 	return msgbox.execute()
 
 if not PropertyManager.loadingFailed:
 	try:
 		# Force initialization of property manager so that it is done before anything else.
 		PropertyManager.getInstance()
-		# We could check for specific version but this at least ensures that libvoikko is installed
+		# We could check for specific version but this at least ensures that libdivvun is installed
 		# (this would throw an exception if it's not).
 		Voikko.getVersion()
 		# name of g_ImplementationHelper is significant, Python component loader expects to find it

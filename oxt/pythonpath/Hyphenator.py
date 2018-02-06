@@ -1,4 +1,4 @@
-# Libreoffice-voikko: Linguistic extension for LibreOffice
+# Libreoffice-divvun: Linguistic extension for LibreOffice
 # Copyright (C) 2015 Harri Pitkänen <hatapitk@iki.fi>
 #
 # This Source Code Form is subject to the terms of the Mozilla Public License,
@@ -13,7 +13,7 @@ import logging
 import unohelper
 from com.sun.star.linguistic2 import XHyphenator, XLinguServiceEventBroadcaster
 from com.sun.star.lang import XServiceInfo, XInitialization, XServiceDisplayName
-from VoikkoHandlePool import VoikkoHandlePool
+from DivvunHandlePool import DivvunHandlePool
 from HyphenatedWord import HyphenatedWord
 from PossibleHyphens import PossibleHyphens
 from PropertyManager import PropertyManager
@@ -35,20 +35,20 @@ class Hyphenator(unohelper.Base, XServiceInfo, XHyphenator, XLinguServiceEventBr
 
 	# From XSupportedLocales
 	def getLocales(self):
-		return VoikkoHandlePool.getInstance().getSupportedHyphenationLocales()
+		return DivvunHandlePool.getInstance().getSupportedHyphenationLocales()
 
 	def hasLocale(self, aLocale):
-		return VoikkoHandlePool.getInstance().supportsHyphenationLocale(aLocale)
+		return DivvunHandlePool.getInstance().supportsHyphenationLocale(aLocale)
 
 	# From XHyphenator
 	def hyphenate(self, word, locale, nMaxLeading, properties):
 		logging.debug("Hyphenator.hyphenate")
 		if len(word) > 10000:
 			return None
-		VoikkoHandlePool.mutex.acquire()
+		DivvunHandlePool.mutex.acquire()
 		try:
-			voikko = VoikkoHandlePool.getInstance().getHandle(locale)
-			if voikko is None:
+			divvun = DivvunHandlePool.getInstance().getHandle(locale)
+			if divvun is None:
 				return None
 			PropertyManager.getInstance().setValues(properties)
 
@@ -61,7 +61,7 @@ class Hyphenator(unohelper.Base, XServiceInfo, XHyphenator, XLinguServiceEventBr
 				PropertyManager.getInstance().resetValues(properties)
 				return None
 
-			hyphenationPoints = voikko.getHyphenationPattern(word)
+			hyphenationPoints = divvun.getHyphenationPattern(word)
 			if hyphenationPoints is None:
 				PropertyManager.getInstance().resetValues(properties)
 				return None
@@ -87,7 +87,7 @@ class Hyphenator(unohelper.Base, XServiceInfo, XHyphenator, XLinguServiceEventBr
 			else:
 				return None
 		finally:
-			VoikkoHandlePool.mutex.release()
+			DivvunHandlePool.mutex.release()
 
 	def queryAlternativeSpelling(self, word, locale, index, properties):
 		logging.debug("Hyphenator.queryAlternativeSpelling")
@@ -99,10 +99,10 @@ class Hyphenator(unohelper.Base, XServiceInfo, XHyphenator, XLinguServiceEventBr
 		wlen = len(word)
 		if wlen > 10000:
 			return None
-		VoikkoHandlePool.mutex.acquire()
+		DivvunHandlePool.mutex.acquire()
 		try:
-			voikko = VoikkoHandlePool.getInstance().getHandle(locale)
-			if voikko is None:
+			divvun = DivvunHandlePool.getInstance().getHandle(locale)
+			if divvun is None:
 				return None
 			PropertyManager.getInstance().setValues(properties)
 
@@ -113,7 +113,7 @@ class Hyphenator(unohelper.Base, XServiceInfo, XHyphenator, XLinguServiceEventBr
 				PropertyManager.getInstance().resetValues(properties)
 				return None
 
-			hyphenationPoints = voikko.getHyphenationPattern(word)
+			hyphenationPoints = divvun.getHyphenationPattern(word)
 			if hyphenationPoints is None:
 				PropertyManager.getInstance().resetValues(properties)
 				return None
@@ -130,24 +130,24 @@ class Hyphenator(unohelper.Base, XServiceInfo, XHyphenator, XLinguServiceEventBr
 			PropertyManager.getInstance().resetValues(properties)
 			return res
 		finally:
-			VoikkoHandlePool.mutex.release()
+			DivvunHandlePool.mutex.release()
 
 	# From XLinguServiceEventBroadcaster
 	def addLinguServiceEventListener(self, xLstnr):
 		logging.debug("Hyphenator.addLinguServiceEventListener")
-		VoikkoHandlePool.mutex.acquire()
+		DivvunHandlePool.mutex.acquire()
 		try:
 			return PropertyManager.getInstance().addLinguServiceEventListener(xLstnr)
 		finally:
-			VoikkoHandlePool.mutex.release()
+			DivvunHandlePool.mutex.release()
 
 	def removeLinguServiceEventListener(self, xLstnr):
 		logging.debug("Hyphenator.removeLinguServiceEventListener")
-		VoikkoHandlePool.mutex.acquire()
+		DivvunHandlePool.mutex.acquire()
 		try:
 			return PropertyManager.getInstance().removeLinguServiceEventListener(xLstnr)
 		finally:
-			VoikkoHandlePool.mutex.release()
+			DivvunHandlePool.mutex.release()
 
 	# From XInitialization
 	def initialize(self, seq):
@@ -156,9 +156,9 @@ class Hyphenator(unohelper.Base, XServiceInfo, XHyphenator, XLinguServiceEventBr
 	# From XServiceDisplayName
 	def getServiceDisplayName(self, locale):
 		if locale.Language == "fi":
-			return "Tavutus (Voikko)"
+			return "Tavutus (Divvun)"
 		else:
-			return "Hyphenator (Voikko)"
+			return "Hyphenator (Divvun)"
 
-Hyphenator.IMPLEMENTATION_NAME = "voikko.Hyphenator"
+Hyphenator.IMPLEMENTATION_NAME = "divvun.Hyphenator"
 Hyphenator.SUPPORTED_SERVICE_NAMES = ("com.sun.star.linguistic2.Hyphenator",)

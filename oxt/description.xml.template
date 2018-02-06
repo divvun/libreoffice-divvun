@@ -3,12 +3,12 @@
              xmlns:d="http://openoffice.org/extensions/description/2006"
              xmlns:xlink="http://www.w3.org/1999/xlink">
 
-  <version value="VOIKKO_VERSION" />
-  <identifier value="org.puimula.ooovoikko" />
+  <version value="DIVVUN_VERSION" />
+  <identifier value="no.divvun.gramcheck" />
 
   <display-name>
-    <name lang="en-US">Writing aids based on Voikko</name>
-    <name lang="fi">Voikko-pohjaiset kirjoituksen aputyökalut</name>
+    <name lang="en-US">Writing aids based on Divvun</name>
+    <name lang="fi">Divvun-pohjaiset kirjoituksen aputyökalut</name>
   </display-name>
 
   <!-- SHOW_LICENSE
@@ -21,8 +21,8 @@
   SHOW_LICENSE -->
 
   <publisher>
-    <name xlink:href="http://voikko.puimula.org" lang="fi">Voikon kehittäjäyhteisö</name>
-    <name xlink:href="http://voikko.puimula.org" lang="en">Voikko development community</name>
+    <name xlink:href="http://divvun.no" lang="fi">Divvun kehittäjäyhteisö</name>
+    <name xlink:href="http://divvun.no" lang="en">Divvun development community</name>
   </publisher>
 
   <icon>
