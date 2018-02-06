@@ -11,9 +11,10 @@
 
 set -e -u
 
-cp ~/src/divvun-suggest/python/libdivvun.py oxt/pythonpath/
-cp ~/src/divvun-suggest/python/_libdivvun.cpython-36m-x86_64-linux-gnu.so oxt/pythonpath/
+# cp ~/src/divvun-suggest/python/libdivvun.py oxt/pythonpath/
+# cp ~/src/divvun-suggest/python/_libdivvun.cpython-36m-x86_64-linux-gnu.so oxt/pythonpath/
 
+make clean
 make
 make oxt
 ( unopkg remove org.puimula.ooovoikko || echo meh )
@@ -25,6 +26,7 @@ export VOIKKO_DEBUG=1
 lowriter "$@" fin.odt 2>&1 | awk '
     { color="" }
     $3 ~ /\[CALL,tid/{color="38;2;205;92;92"  }
+    $3 ~ /\[CALL,tid/ && $5 ~ /except/ {color="37;1;205;92;91"  }
     $2 == "INFO"     {color="38;2;175;175;135"}
     $2 == "DEBUG"    {color="38;2;100;149;237"}
     $2 == "WARNING"  {color="38;5;161"        }
