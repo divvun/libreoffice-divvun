@@ -17,7 +17,6 @@ from com.sun.star.awt import XContainerWindowEventHandler
 from com.sun.star.beans import UnknownPropertyException
 from PropertyManager import PropertyManager
 from DivvunHandlePool import DivvunHandlePool
-from libvoikko import Voikko
 
 class SettingsEventHandler(unohelper.Base, XServiceInfo, XContainerWindowEventHandler):
 
@@ -121,8 +120,9 @@ class SettingsEventHandler(unohelper.Base, XServiceInfo, XContainerWindowEventHa
 		uno.invoke(variantProps, "setPropertyValue", ("SelectedItems", uno.Any("[]short", tuple(selectedValues))))
 
 	def __initAvailableVariants(self):
-		dicts = Voikko.listDicts(DivvunHandlePool.getInstance().getDictionaryPath())
-		self.__dictionaryVariantList = []
+		# dicts = libdivvun.listDicts(DivvunHandlePool.getInstance().getDictionaryPath())
+		dicts = []
+		self.__dictionaryVariantList = ["kbu: TODO"]
 		for vDict in dicts:
 			dictName = vDict.variant + ": " + vDict.description
 			self.__dictionaryVariantList.append(dictName)

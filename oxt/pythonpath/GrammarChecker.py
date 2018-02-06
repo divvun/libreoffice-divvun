@@ -24,11 +24,6 @@ class GrammarChecker(unohelper.Base, XServiceInfo, XProofreader, XInitialization
 	def __init__(self, ctx, *args):
 		logging.debug("GrammarChecker.__init__")
 		self.__ignoredErrors = set() # Grammar checker error codes that should be ignored
-		spec = libdivvun.ArCheckerSpec("/usr/share/voikko/4/se.zcheck")
-		smegram = spec.getChecker("smegram", True)
-		self.divvunCheckers = {
-			'se': smegram
-		}
 		logging.debug("GrammarChecker.__init__ done")
 
 	# From XServiceInfo
@@ -64,61 +59,6 @@ class GrammarChecker(unohelper.Base, XServiceInfo, XProofreader, XInitialization
 		result.nBehindEndOfSentencePosition = nSuggestedBehindEndOfSentencePosition
 		result.xProofreader = self
 
-		gcErrors = []
-		logging.info("Checking '%s', nStartOfSentencePos=%d, nSuggestedBehindEndOfSentencePosition=%d",
-				aText, nStartOfSentencePos, nSuggestedBehindEndOfSentencePosition)
-		for dError in libdivvun.proc_errs_bytes(self.divvunCheckers['se'], aText):
-			startPos = dError.beg
-			errorLength = dError.end - dError.beg
-			logging.info("dError on form=%s at (%d,%d) replacements: %s",
-					dError.form, dError.beg, dError.end, dError.rep)
-			if dError.beg < result.nStartOfSentencePosition:
-				logging.info("beg %d < result.nStartOfSentencePosition %d, continue",
-						dError.beg, result.nStartOfSentencePosition)
-				continue
-			if dError.beg >= result.nBehindEndOfSentencePosition:
-				logging.info("beg %d >= result.nBehindEndOfSentencePosition %d, break",
-						dError.beg, result.nBehindEndOfSentencePosition)
-				break
-			if dError.beg + errorLength > result.nBehindEndOfSentencePosition:
-				logging.info("dError.beg %d + errorLength %d > result.nBehindEndOfSentencePosition %d, incf",
-						dError.beg, errorLength, result.nBehindEndOfSentencePosition)
-				result.nBehindEndOfSentencePosition = dError.beg + errorLength
-			logging.info("dError on form=%s at (%d,%d) replacements: %s",
-					dError.form,
-					dError.beg, dError.end,
-					dError.rep)
-			ruleIdentifier = dError.err
-			if ruleIdentifier in self.__ignoredErrors:
-				# ignore this dError
-				logging.info("ignored")
-				continue
-
-			suggestions = dError.rep
-			gcError = SingleProofreadingError()
-			gcErrors.append(gcError)
-			gcError.nErrorStart = startPos
-			gcError.nErrorLength = errorLength
-			gcError.nErrorType = PROOFREADING
-			comment = dError.msg
-			gcError.aShortComment = comment
-			gcError.aFullComment = comment
-			gcError.aRuleIdentifier = ruleIdentifier
-
-			detailUrl = PropertyValue()
-			detailUrl.Name = "FullCommentURL"
-			detailUrl.Value = "http://divvun.no/gchelp/" + aLocale.Language + "/" + ruleIdentifier + ".html"
-			gcError.aProperties = (detailUrl,)
-
-			# add suggestions
-			if len(suggestions) > 0:
-				gcError.aSuggestions = tuple(suggestions)
-
-		result.aErrors = tuple(gcErrors)
-		result.nStartOfNextSentencePosition = result.nBehindEndOfSentencePosition
-		logging.info("return result, errors: %d", len(result.aErrors))
-		return result
-
 		DivvunHandlePool.mutex.acquire()
 		try:
 			divvun = DivvunHandlePool.getInstance().getHandle(aLocale)
@@ -127,41 +67,49 @@ class GrammarChecker(unohelper.Base, XServiceInfo, XProofreader, XInitialization
 				return result
 
 			gcErrors = []
-			gcI = 0
-			vErrorCount = 0
-			for vError in divvun.grammarErrors(aText, PropertyManager.getInstance().getMessageLanguage()):
-				startPos = vError.startPos
-				errorLength = vError.errorLen
-
-				if startPos < result.nStartOfSentencePosition:
+			logging.info("Checking '%s', nStartOfSentencePos=%d, nSuggestedBehindEndOfSentencePosition=%d",
+					aText, nStartOfSentencePos, nSuggestedBehindEndOfSentencePosition)
+			for dError in libdivvun.proc_errs_bytes(divvun, aText):
+				startPos = dError.beg
+				errorLength = dError.end - dError.beg
+				logging.info("dError on form=%s at (%d,%d) replacements: %s",
+						dError.form, dError.beg, dError.end, dError.rep)
+				if dError.beg < result.nStartOfSentencePosition:
+					logging.info("beg %d < result.nStartOfSentencePosition %d, continue",
+							dError.beg, result.nStartOfSentencePosition)
 					continue
-				if startPos >= result.nBehindEndOfSentencePosition:
+				if dError.beg >= result.nBehindEndOfSentencePosition:
+					logging.info("beg %d >= result.nBehindEndOfSentencePosition %d, break",
+							dError.beg, result.nBehindEndOfSentencePosition)
 					break
-				if startPos + errorLength > result.nBehindEndOfSentencePosition:
-					result.nBehindEndOfSentencePosition = startPos + errorLength
-
-				# we have a real grammar error
-				errorCode = vError.errorCode
-				ruleIdentifier = str(errorCode)
+				if dError.beg + errorLength > result.nBehindEndOfSentencePosition:
+					logging.info("dError.beg %d + errorLength %d > result.nBehindEndOfSentencePosition %d, incf",
+							dError.beg, errorLength, result.nBehindEndOfSentencePosition)
+					result.nBehindEndOfSentencePosition = dError.beg + errorLength
+				logging.info("dError on form=%s at (%d,%d) replacements: %s",
+						dError.form,
+						dError.beg, dError.end,
+						dError.rep)
+				ruleIdentifier = dError.err
 				if ruleIdentifier in self.__ignoredErrors:
-					# ignore this error
+					# ignore this dError
+					logging.info("ignored")
 					continue
 
-				suggestions = vError.suggestions
-
+				suggestions = dError.rep
 				gcError = SingleProofreadingError()
 				gcErrors.append(gcError)
 				gcError.nErrorStart = startPos
 				gcError.nErrorLength = errorLength
 				gcError.nErrorType = PROOFREADING
-				comment = vError.shortDescription
+				comment = dError.msg
 				gcError.aShortComment = comment
 				gcError.aFullComment = comment
 				gcError.aRuleIdentifier = ruleIdentifier
 
 				detailUrl = PropertyValue()
 				detailUrl.Name = "FullCommentURL"
-				detailUrl.Value = "http://divvun.puimula.org/gchelp/fi/" + ruleIdentifier + ".html"
+				detailUrl.Value = "http://divvun.no/gchelp/" + aLocale.Language + "/" + ruleIdentifier + ".html"
 				gcError.aProperties = (detailUrl,)
 
 				# add suggestions
@@ -170,6 +118,7 @@ class GrammarChecker(unohelper.Base, XServiceInfo, XProofreader, XInitialization
 
 			result.aErrors = tuple(gcErrors)
 			result.nStartOfNextSentencePosition = result.nBehindEndOfSentencePosition
+			logging.info("return result, errors: %d", len(result.aErrors))
 			return result
 		finally:
 			DivvunHandlePool.mutex.release()

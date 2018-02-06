@@ -16,7 +16,6 @@ import logging
 import unohelper
 from com.sun.star.awt.MessageBoxType import ERRORBOX
 from com.sun.star.awt.MessageBoxButtons import BUTTONS_OK
-from libvoikko import Voikko
 from SettingsEventHandler import SettingsEventHandler
 from SpellChecker import SpellChecker
 from Hyphenator import Hyphenator
@@ -42,7 +41,7 @@ if not PropertyManager.loadingFailed:
 		PropertyManager.getInstance()
 		# We could check for specific version but this at least ensures that libdivvun is installed
 		# (this would throw an exception if it's not).
-		Voikko.getVersion()
+		# libdivvun.version
 		# name of g_ImplementationHelper is significant, Python component loader expects to find it
 		g_ImplementationHelper = unohelper.ImplementationHelper()
 		g_ImplementationHelper.addImplementation(SettingsEventHandler, \

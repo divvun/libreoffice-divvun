@@ -12,10 +12,11 @@
 import logging
 import os
 import platform
-from libvoikko import Voikko, VoikkoException
 from collections import defaultdict
 from threading import RLock
 from com.sun.star.lang import Locale
+
+import libdivvun
 
 class Bcp47ToLoMapping:
 
@@ -355,14 +356,19 @@ class DivvunHandlePool:
 	def __openHandleWithVariant(self, language, fullVariant):
 		logging.debug("DivvunHandlePool.__openHandleWithVariant")
 		try:
-			divvunHandle = Voikko(fullVariant, self.getDictionaryPath())
+			# TODO: send getDictionaryPath to libdivvun and let it discover installed dictionaries?
+			# spec = libdivvun.ArCheckerSpec(self.getDictionaryPath())
+			spec = libdivvun.ArCheckerSpec("/usr/share/voikko/4/se.zcheck")
+			divvunHandle = spec.getChecker("smegram", True)
 			self.__handles[language] = divvunHandle
 			for booleanOpt, booleanValue in self.__globalBooleanOptions.items():
-				divvunHandle.setBooleanOption(booleanOpt, booleanValue)
+				pass
+				# divvunHandle.setBooleanOption(booleanOpt, booleanValue)
 			for integerOpt, integerValue in self.__globalIntegerOptions.items():
-				divvunHandle.setIntegerOption(integerOpt, integerValue)
+				# divvunHandle.setIntegerOption(integerOpt, integerValue)
+				pass
 			return divvunHandle;
-		except VoikkoException as e:
+		except Exception as e:
 			self.__initializationErrors[language] = e.args[0]
 			return None
 
@@ -430,16 +436,25 @@ class DivvunHandlePool:
 		return tuple(localeList)
 
 	def getSupportedSpellingLocales(self):
-		return self.__getSupportedLocalesForOperation(self.__supportedSpellingLocales, Voikko.listSupportedSpellingLanguages)
+		def listLangs(path):  # TODO: get from libdivvun
+			return []
+		res = self.__getSupportedLocalesForOperation(self.__supportedSpellingLocales, listLangs)
+		logging.info("supported spelling locales: %s", res)
+		return res
 
 	def getSupportedHyphenationLocales(self):
-		return self.__getSupportedLocalesForOperation(self.__supportedHyphenationLocales, Voikko.listSupportedHyphenationLanguages)
+		def listLangs(path):  # TODO: get from libdivvun
+			return []
+		res = self.__getSupportedLocalesForOperation(self.__supportedHyphenationLocales, listLangs)
+		logging.info("supported hyphenation locales: %s", res)
+		return res
 
 	def getSupportedGrammarLocales(self):
-		def listSupportedGCLangs(path):
-			return ["se"] + Voikko.listSupportedGrammarCheckingLanguages(path)
-		logging.info("supported gc locales: %s", self.__getSupportedLocalesForOperation(self.__supportedGrammarCheckingLocales, listSupportedGCLangs))
-		return self.__getSupportedLocalesForOperation(self.__supportedGrammarCheckingLocales, listSupportedGCLangs)
+		def listLangs(path):  # TODO: get from libdivvun
+			return ["se"]
+		res = self.__getSupportedLocalesForOperation(self.__supportedGrammarCheckingLocales, listLangs)
+		logging.info("supported gc locales: %s", res)
+		return res
 
 	def getInitializationStatus(self):
 		"""Returns initialization status diagnostics"""
@@ -461,7 +476,7 @@ class DivvunHandlePool:
 		self.__installationPath = path
 		searchPath = os.path.join(path, "divvun", platform.system() + "-" + "-".join(platform.architecture()))
 		logging.debug("DivvunHandlePool.setInstallationPath: library search path is " + searchPath)
-		Voikko.setLibrarySearchPath(searchPath)
+		# Voikko.setLibrarySearchPath(searchPath)
 
 	def getPreferredGlobalVariant(self):
 		return self.__preferredGlobalVariant
