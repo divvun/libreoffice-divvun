@@ -356,10 +356,19 @@ class DivvunHandlePool:
 	def __openHandleWithVariant(self, language, fullVariant):
 		logging.debug("DivvunHandlePool.__openHandleWithVariant")
 		try:
-			# TODO: send getDictionaryPath to libdivvun and let it discover installed dictionaries?
-			# spec = libdivvun.ArCheckerSpec(self.getDictionaryPath())
-			spec = libdivvun.ArCheckerSpec("/usr/share/voikko/4/se.zcheck")
-			divvunHandle = spec.getChecker("smegram", True)
+			# TODO: send self.getDictionaryPath() to libdivvun and let it discover installed dictionaries?
+			allLangs = libdivvun.listLangs()
+			if not language in allLangs:
+				raise Exception("Couldn't find data for language {}".format(language))
+			# We assume the first matching spec for a language is the preferred (e.g. from user dir)
+			specpath = allLangs[language][0]
+			logging.info("Loading language {} with spec from {}".format(language, specpath))
+			# TODO: Any reason to support non-archive specs here?
+			spec = libdivvun.ArCheckerSpec(specpath)
+			# TODO: Use preferences
+			pipename = spec.defaultPipe()
+			verbose = True
+			divvunHandle = spec.getChecker(pipename, verbose)
 			self.__handles[language] = divvunHandle
 			for booleanOpt, booleanValue in self.__globalBooleanOptions.items():
 				pass
