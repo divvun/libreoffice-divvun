@@ -51,8 +51,10 @@ except OSError as e:
 except:
 	loadingFailed = True
 	msg = "\n".join(["Please report this to http://divvun.no/contact.html :\n",
-			 "sys.path = ",
-			 str(sys.path),
+			 "sys.version = " + str(sys.version),
+			 "sys.path = " + str(sys.path),
+			 "sys.prefix = " + str(sys.prefix),
+			 "sys.exec_prefix = " + str(sys.exec_prefix),
 			 "\nTraceback:",
 			 "".join(traceback.format_exception(*sys.exc_info()))])
 	logging.warn(msg)
