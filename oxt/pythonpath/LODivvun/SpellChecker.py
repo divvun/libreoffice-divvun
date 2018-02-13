@@ -13,9 +13,9 @@ import logging
 import unohelper
 from com.sun.star.linguistic2 import XSpellChecker, XLinguServiceEventBroadcaster
 from com.sun.star.lang import XServiceInfo, XInitialization, XServiceDisplayName
-from DivvunHandlePool import DivvunHandlePool
-from SpellAlternatives import SpellAlternatives
-from PropertyManager import PropertyManager
+from LODivvun.DivvunHandlePool import DivvunHandlePool
+from LODivvun.SpellAlternatives import SpellAlternatives
+from LODivvun.PropertyManager import PropertyManager
 
 class SpellChecker(unohelper.Base, XServiceInfo, XSpellChecker, XLinguServiceEventBroadcaster, XInitialization, XServiceDisplayName):
 

@@ -12,15 +12,16 @@
 import os
 import uno
 import sys
+import traceback
 import logging
 import unohelper
 from com.sun.star.awt.MessageBoxType import ERRORBOX
 from com.sun.star.awt.MessageBoxButtons import BUTTONS_OK
-from SettingsEventHandler import SettingsEventHandler
-from SpellChecker import SpellChecker
-from Hyphenator import Hyphenator
-from GrammarChecker import GrammarChecker
-from PropertyManager import PropertyManager
+from LODivvun.SettingsEventHandler import SettingsEventHandler
+from LODivvun.SpellChecker import SpellChecker
+from LODivvun.Hyphenator import Hyphenator
+from LODivvun.GrammarChecker import GrammarChecker
+from LODivvun.PropertyManager import PropertyManager
 
 logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
     datefmt='%d-%m-%Y:%H:%M:%S')
@@ -61,4 +62,6 @@ if not PropertyManager.loadingFailed:
 		messageBox("OSError: {0}".format(e))
 	except:
 		PropertyManager.loadingFailed = True
-		messageBox(str(sys.exc_info()[0]))
+		msg = "\n".join(traceback.format_exception(*sys.exc_info()))
+		logging.warn(msg)
+		messageBox(msg)

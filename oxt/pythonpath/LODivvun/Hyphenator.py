@@ -13,10 +13,10 @@ import logging
 import unohelper
 from com.sun.star.linguistic2 import XHyphenator, XLinguServiceEventBroadcaster
 from com.sun.star.lang import XServiceInfo, XInitialization, XServiceDisplayName
-from DivvunHandlePool import DivvunHandlePool
-from HyphenatedWord import HyphenatedWord
-from PossibleHyphens import PossibleHyphens
-from PropertyManager import PropertyManager
+from LODivvun.DivvunHandlePool import DivvunHandlePool
+from LODivvun.HyphenatedWord import HyphenatedWord
+from LODivvun.PossibleHyphens import PossibleHyphens
+from LODivvun.PropertyManager import PropertyManager
 
 class Hyphenator(unohelper.Base, XServiceInfo, XHyphenator, XLinguServiceEventBroadcaster, XInitialization, XServiceDisplayName):
 

@@ -15,8 +15,8 @@ import uno
 from com.sun.star.lang import XServiceInfo
 from com.sun.star.awt import XContainerWindowEventHandler
 from com.sun.star.beans import UnknownPropertyException
-from PropertyManager import PropertyManager
-from DivvunHandlePool import DivvunHandlePool
+from LODivvun.PropertyManager import PropertyManager
+from LODivvun.DivvunHandlePool import DivvunHandlePool
 
 class SettingsEventHandler(unohelper.Base, XServiceInfo, XContainerWindowEventHandler):
 

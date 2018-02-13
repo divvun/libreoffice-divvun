@@ -15,8 +15,8 @@ from com.sun.star.linguistic2 import XProofreader, ProofreadingResult, SinglePro
 from com.sun.star.lang import XServiceInfo, XInitialization, XServiceDisplayName
 from com.sun.star.beans import PropertyValue
 from com.sun.star.text.TextMarkupType import PROOFREADING
-from DivvunHandlePool import DivvunHandlePool
-from PropertyManager import PropertyManager
+from LODivvun.DivvunHandlePool import DivvunHandlePool
+from LODivvun.PropertyManager import PropertyManager
 import libdivvun
 
 class GrammarChecker(unohelper.Base, XServiceInfo, XProofreader, XInitialization, XServiceDisplayName):

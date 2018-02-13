@@ -15,7 +15,7 @@ import os
 import sys
 import locale
 import uno
-from DivvunHandlePool import DivvunHandlePool
+from LODivvun.DivvunHandlePool import DivvunHandlePool
 from com.sun.star.beans import XPropertyChangeListener, UnknownPropertyException, PropertyValue
 from com.sun.star.linguistic2 import LinguServiceEvent
 from com.sun.star.linguistic2.LinguServiceEventFlags import SPELL_CORRECT_WORDS_AGAIN, SPELL_WRONG_WORDS_AGAIN, HYPHENATE_AGAIN, PROOFREAD_AGAIN
@@ -126,8 +126,9 @@ class PropertyManager(unohelper.Base, XPropertyChangeListener):
 
 	def __getInstallationPath(self):
 		dname = os.path.dirname(sys.modules[__name__].__file__)
-		if dname.endswith("pythonpath"):
-			dname = dname[:-11]
+		expectedSuffix = "pythonpath/LODivvun"
+		if dname.endswith(expectedSuffix):
+			dname = dname[:-len(expectedSuffix )]
 			logging.debug("PropertyManager.getInstallationPath: '" + dname + "'")
 			return dname
 		else:

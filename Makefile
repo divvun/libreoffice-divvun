@@ -61,9 +61,10 @@ endif
 SRC_AND_DIST=config.xcu config.xcs icon.png SettingsDialog.xdl SettingsDialog_en_US.properties \
              SettingsDialog_fi_FI.properties SettingsDialog_en_US.default SettingsDialog.xcu Linguistic.xcu \
              divvun.components META-INF/manifest.xml lodivvun.py \
-             pythonpath/SettingsEventHandler.py pythonpath/SpellChecker.py pythonpath/DivvunHandlePool.py \
-             pythonpath/SpellAlternatives.py pythonpath/PropertyManager.py pythonpath/Hyphenator.py \
-             pythonpath/HyphenatedWord.py pythonpath/PossibleHyphens.py pythonpath/GrammarChecker.py
+             pythonpath/LODivvun/__init__.py \
+             pythonpath/LODivvun/SettingsEventHandler.py pythonpath/LODivvun/SpellChecker.py pythonpath/LODivvun/DivvunHandlePool.py \
+             pythonpath/LODivvun/SpellAlternatives.py pythonpath/LODivvun/PropertyManager.py pythonpath/LODivvun/Hyphenator.py \
+             pythonpath/LODivvun/HyphenatedWord.py pythonpath/LODivvun/PossibleHyphens.py pythonpath/LODivvun/GrammarChecker.py
 SRCDIST=COPYING Makefile README ChangeLog oxt/description.xml.template \
         $(patsubst %,oxt/%,$(SRC_AND_DIST)) \
         oxt/icon.svg oxt/license_fi.txt oxt/license_en-US.txt
@@ -76,7 +77,7 @@ endif
 
 ifdef STANDALONE_EXTENSION
 	STANDALONE_EXTENSION_FILES=$(shell find divvun -type f '!' -name '.*' '!' -path 'divvun*/.*')
-	COPY_TEMPLATES+=pythonpath/libdivvun.py
+	COPY_TEMPLATES+=pythonpath/LODivvun/libdivvun.py
 else
 	STANDALONE_EXTENSION_FILES=
 endif
