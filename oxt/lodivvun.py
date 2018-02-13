@@ -17,17 +17,14 @@ import logging
 import unohelper
 from com.sun.star.awt.MessageBoxType import ERRORBOX
 from com.sun.star.awt.MessageBoxButtons import BUTTONS_OK
-from LODivvun.SettingsEventHandler import SettingsEventHandler
-from LODivvun.SpellChecker import SpellChecker
-from LODivvun.Hyphenator import Hyphenator
-from LODivvun.GrammarChecker import GrammarChecker
-from LODivvun.PropertyManager import PropertyManager
 
 logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
     datefmt='%d-%m-%Y:%H:%M:%S')
 
 if "DIVVUN_DEBUG" in os.environ:
 	logging.getLogger().setLevel(logging.DEBUG)
+
+logging.debug("sys.path: {}".format(sys.path))
 
 def messageBox(messageText):
 	ctx = uno.getComponentContext()
@@ -36,13 +33,36 @@ def messageBox(messageText):
 	msgbox = toolkit.createMessageBox(None, ERRORBOX, BUTTONS_OK, "Error initializing Divvun", messageText)
 	return msgbox.execute()
 
+# We try importing libdivvun before any of the other modules that may
+# depend on libdivvun (this includes PropertyManager!), so we can
+# catch the exception and show it to the user:
+loadingFailed = False
+try:
+    import libdivvun
+    logging.debug("libdivvun.searchPaths(): {}".format(list(libdivvun.searchPaths())))
+    from LODivvun.PropertyManager import PropertyManager
+    from LODivvun.SettingsEventHandler import SettingsEventHandler
+    from LODivvun.SpellChecker import SpellChecker
+    from LODivvun.Hyphenator import Hyphenator
+    from LODivvun.GrammarChecker import GrammarChecker
+except OSError as e:
+	loadingFailed = True
+	messageBox("OSError: {0}".format(e))
+except:
+	loadingFailed = True
+	msg = "\n".join(["Please report this to http://divvun.no/contact.html :\n",
+			 "sys.path = ",
+			 str(sys.path),
+			 "\nTraceback:",
+			 "".join(traceback.format_exception(*sys.exc_info()))])
+	logging.warn(msg)
+	messageBox(msg)
+
+# Presumably this can fail too, catch the same kinds of errors here:
 if not PropertyManager.loadingFailed:
 	try:
 		# Force initialization of property manager so that it is done before anything else.
 		PropertyManager.getInstance()
-		# We could check for specific version but this at least ensures that libdivvun is installed
-		# (this would throw an exception if it's not).
-		# libdivvun.version
 		# name of g_ImplementationHelper is significant, Python component loader expects to find it
 		g_ImplementationHelper = unohelper.ImplementationHelper()
 		g_ImplementationHelper.addImplementation(SettingsEventHandler, \
