@@ -28,9 +28,10 @@ DIVVUN_VERSION=5.0
 # make install-unpacked
 DESTDIR=/usr/lib/libreoffice-divvun
 
-# Uncomment the following if you want to build a standalone extension.
+# Uncomment the following (or use "make oxt STANDALONE_EXTENSION=1") if you want
+# to build a standalone extension.
 # Files to be delivered with the extension must be placed under directory divvun/
-# and libdivvun.py under oxt/pythonpath/
+# and libdivvun.py and _libdivvun*{dll,so} under oxt/pythonpath/
 # STANDALONE_EXTENSION=1
 
 # === End build settings ===
@@ -62,6 +63,7 @@ SRC_AND_DIST=config.xcu config.xcs icon.png SettingsDialog.xdl SettingsDialog_en
              SettingsDialog_fi_FI.properties SettingsDialog_en_US.default SettingsDialog.xcu Linguistic.xcu \
              divvun.components META-INF/manifest.xml lodivvun.py \
              pythonpath/LODivvun/__init__.py \
+             pythonpath/LODivvun/LibLoad.py \
              pythonpath/LODivvun/SettingsEventHandler.py pythonpath/LODivvun/SpellChecker.py pythonpath/LODivvun/DivvunHandlePool.py \
              pythonpath/LODivvun/SpellAlternatives.py pythonpath/LODivvun/PropertyManager.py pythonpath/LODivvun/Hyphenator.py \
              pythonpath/LODivvun/HyphenatedWord.py pythonpath/LODivvun/PossibleHyphens.py pythonpath/LODivvun/GrammarChecker.py
@@ -76,9 +78,9 @@ ifdef SHOW_LICENSE
 endif
 
 ifdef STANDALONE_EXTENSION
-	STANDALONE_EXTENSION_FILES=$(shell find divvun -type f '!' -name '.*' '!' -path 'divvun*/.*')
+	STANDALONE_EXTENSION_FILES=$(shell find divvun \( -type f -o -type l \) '!' -name '.*' '!' -path 'divvun*/.*')
 	COPY_TEMPLATES+=pythonpath/libdivvun.py
-	COPY_TEMPLATES+=$(shell find oxt/pythonpath -type f -name '_libdivvun*' -printf "pythonpath/%f")
+	COPY_TEMPLATES+=$(shell find oxt/pythonpath \( -type f -o -type l \) -name '_libdivvun*' -printf "pythonpath/%f")
 else
 	STANDALONE_EXTENSION_FILES=
 endif

@@ -9,8 +9,10 @@
 ### Makefile. OTOH, we need the C lib available too, and libdivvun
 ### installs that, so might as well keep them separate.
 
-export LD_LIBRARY_PATH="$HOME/PREFIX/gtd-gc/lib"
-export PYTHONPATH="$HOME/PREFIX/gtd-gc/lib/python3.6/site-packages"
+if [[ -z $STANDALONE_EXTENSION ]]; then
+    export LD_LIBRARY_PATH="$HOME/PREFIX/gtd-gc/lib"
+    export PYTHONPATH="$HOME/PREFIX/gtd-gc/lib/python3.6/site-packages"
+fi
 
 set -e -u
 
@@ -19,7 +21,11 @@ set -e -u
 
 make clean
 make
-make oxt
+if [[ -z ${STANDALONE_EXTENSION:-} ]]; then
+    make oxt
+else
+    make oxt STANDALONE_EXTENSION=1
+fi
 ( unopkg remove no.divvun.gramcheck || echo meh )
 unopkg add -f build/divvun.oxt
 

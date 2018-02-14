@@ -18,6 +18,9 @@ import unohelper
 from com.sun.star.awt.MessageBoxType import ERRORBOX
 from com.sun.star.awt.MessageBoxButtons import BUTTONS_OK
 
+from LODivvun.LibLoad import messageBox, loadLibs
+
+
 logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
     datefmt='%d-%m-%Y:%H:%M:%S')
 
@@ -26,17 +29,13 @@ if "DIVVUN_DEBUG" in os.environ:
 
 logging.debug("sys.path: {}".format(sys.path))
 
-def messageBox(messageText):
-	ctx = uno.getComponentContext()
-	sManager = ctx.ServiceManager
-	toolkit = sManager.createInstance("com.sun.star.awt.Toolkit")
-	msgbox = toolkit.createMessageBox(None, ERRORBOX, BUTTONS_OK, "Error initializing Divvun", messageText)
-	return msgbox.execute()
 
-# We try importing libdivvun before any of the other modules that may
-# depend on libdivvun (this includes PropertyManager!), so we can
+# We first try importing C libraries before any of the Python libraries:
+loadLibs()
+
+# We now try importing libdivvun before any of the other modules that
+# may depend on libdivvun (this includes PropertyManager!), so we can
 # catch the exception and show it to the user:
-loadingFailed = False
 try:
     import libdivvun
     logging.debug("libdivvun.searchPaths(): {}".format(list(libdivvun.searchPaths())))
@@ -46,10 +45,10 @@ try:
     from LODivvun.Hyphenator import Hyphenator
     from LODivvun.GrammarChecker import GrammarChecker
 except OSError as e:
+	if not loadingFailed:
+		messageBox("OSError on loading Python libdivvun library {}: {0}".format(e))
 	loadingFailed = True
-	messageBox("OSError: {0}".format(e))
 except:
-	loadingFailed = True
 	msg = "\n".join(["Please report this to http://divvun.no/contact.html :\n",
 			 "sys.version = " + str(sys.version),
 			 "sys.path = " + str(sys.path),
@@ -58,7 +57,9 @@ except:
 			 "\nTraceback:",
 			 "".join(traceback.format_exception(*sys.exc_info()))])
 	logging.warn(msg)
-	messageBox(msg)
+	if not loadingFailed:
+		messageBox(msg)
+	loadingFailed = True
 
 # Presumably this can fail too, catch the same kinds of errors here:
 if not PropertyManager.loadingFailed:
@@ -81,7 +82,7 @@ if not PropertyManager.loadingFailed:
 		                    GrammarChecker.SUPPORTED_SERVICE_NAMES,)
 	except OSError as e:
 		PropertyManager.loadingFailed = True
-		messageBox("OSError: {0}".format(e))
+		messageBox("OSError on loading PropertyManager {}: {0}".format(e))
 	except:
 		PropertyManager.loadingFailed = True
 		msg = "\n".join(traceback.format_exception(*sys.exc_info()))

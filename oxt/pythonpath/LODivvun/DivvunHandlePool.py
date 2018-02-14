@@ -488,7 +488,8 @@ class DivvunHandlePool:
 		else:
 			searchPath = os.path.join(path, "divvun", platform.system() + "-" + "-".join(platform.architecture()))
 			logging.debug("DivvunHandlePool.setInstallationPath: library search path is " + searchPath)
-			# Voikko.setLibrarySearchPath(searchPath)
+			# We do this here in the extension instead, in LO.LibLoad.loadLibs:
+			# libdivvun.setLibrarySearchPath(searchPath)
 
 	def getPreferredGlobalVariant(self):
 		return self.__preferredGlobalVariant
