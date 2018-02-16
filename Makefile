@@ -80,7 +80,7 @@ endif
 ifdef STANDALONE_EXTENSION
 	STANDALONE_EXTENSION_FILES=$(shell find divvun \( -type f -o -type l \) '!' -name '.*' '!' -path 'divvun*/.*')
 	COPY_TEMPLATES+=pythonpath/libdivvun.py
-	COPY_TEMPLATES+=$(shell cd oxt && find oxt/pythonpath \( -type f -o -type l \) -name '_libdivvun*' -print)
+	COPY_TEMPLATES+=$(shell cd oxt && find pythonpath \( -type f -o -type l \) -name '_libdivvun*' -print)
 else
 	STANDALONE_EXTENSION_FILES=
 endif
