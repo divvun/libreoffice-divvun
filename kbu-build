@@ -47,3 +47,7 @@ soffice "$@" sme.odt 2>&1 | awk '
     color { printf "\033["color"m%s\033[0m\n", $0; next }
           { print }
 '
+
+# Fixing Mac libs:
+# otool -L oxt/pythonpath/_libdivvun.cpython-3.5m.so
+# install_name_tool -change /path/to/libdivvun.0.dylib @loader_path/../divvun/Darwin-64bit-/libdivvun.dylib oxt/pythonpath/_libdivvun.cpython-3.5m.so

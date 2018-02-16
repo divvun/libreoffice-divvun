@@ -27,6 +27,16 @@ def messageBox(messageText):
 	msgbox = toolkit.createMessageBox(None, ERRORBOX, BUTTONS_OK, "Error initializing Divvun", messageText)
 	return msgbox.execute()
 
+
+def platformSuffix():
+	if os.name == "nt":
+		logging.warn("Windows completely untested")
+		return "dll"
+	if sys.platform == "darwin":
+		return "dylib"
+	else:
+		return "so"
+
 def loadLibs():
 	# This function has to be in a module (not lodivvun.py) to work
 	dname = os.path.dirname(sys.modules[__name__].__file__)
@@ -47,12 +57,15 @@ def loadLibs():
 		logging.debug("Loading C libraries from search path {}".format(searchPath))
 	# Keep libdivvun.so last, since it depends on the others:
 	cnames = ["cg3", "archive", "hfst", "hfstospell", "pugixml", "divvun"]
+	suffix = platformSuffix()
 	clibs = {}
 	loadingFailed = False
 	for libname in cnames:
 		try:
-			clibs[libname] = CDLL(os.path.join(searchPath, "lib{}.so".format(libname)))
+			clibs[libname] = CDLL(os.path.join(searchPath, "lib{}.{}".format(libname, suffix)))
 		except OSError as e:
+			msg = "OSError on loading C library {}: {}".format(libname, e)
+			logging.warning(msg)
 			if not loadingFailed:
-				messageBox("OSError on loading C library {}: {}".format(libname, e))
+				messageBox(msg)
 			loadingFailed = True

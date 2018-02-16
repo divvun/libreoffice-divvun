@@ -36,6 +36,7 @@ loadLibs()
 # We now try importing libdivvun before any of the other modules that
 # may depend on libdivvun (this includes PropertyManager!), so we can
 # catch the exception and show it to the user:
+loadingFailed = False
 try:
     import libdivvun
     logging.debug("libdivvun.searchPaths(): {}".format(list(libdivvun.searchPaths())))
@@ -62,7 +63,7 @@ except:
 	loadingFailed = True
 
 # Presumably this can fail too, catch the same kinds of errors here:
-if not PropertyManager.loadingFailed:
+if not (loadingFailed or PropertyManager.loadingFailed):
 	try:
 		# Force initialization of property manager so that it is done before anything else.
 		PropertyManager.getInstance()
