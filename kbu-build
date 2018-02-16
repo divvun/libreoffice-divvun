@@ -10,11 +10,16 @@
 ### installs that, so might as well keep them separate.
 
 if [[ -z $STANDALONE_EXTENSION ]]; then
+    set -x
     export LD_LIBRARY_PATH="$HOME/PREFIX/gtd-gc/lib"
     export PYTHONPATH="$HOME/PREFIX/gtd-gc/lib/python3.6/site-packages"
+    set +x
 fi
 
 set -e -u
+
+# For Mac-building:
+PATH="/Applications/LibreOffice.app/Contents/MacOS/:$PATH"
 
 # cp ~/src/divvun-suggest/python/libdivvun.py oxt/pythonpath/
 # cp ~/src/divvun-suggest/python/_libdivvun.cpython-36m-x86_64-linux-gnu.so oxt/pythonpath/
@@ -32,7 +37,7 @@ unopkg add -f build/divvun.oxt
 ### Used by divvun when we want debug output:
 export DIVVUN_DEBUG=1
 
-lowriter "$@" sme.odt 2>&1 | awk '
+soffice "$@" sme.odt 2>&1 | awk '
     { color="" }
     $3 ~ /\[CALL,tid/{color="38;2;205;92;92"  }
     $3 ~ /\[CALL,tid/ && $5 ~ /except/ {color="37;1;205;92;91"  }
