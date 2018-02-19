@@ -78,7 +78,7 @@ ifdef SHOW_LICENSE
 endif
 
 ifdef STANDALONE_EXTENSION
-	STANDALONE_EXTENSION_FILES=$(shell find divvun \( -type f -o -type l \) '!' -name '.*' '!' -path 'divvun*/.*')
+	STANDALONE_EXTENSION_FILES=$(shell find oxt/divvun \( -type f -o -type l \) '!' -name '.*' '!' -path 'oxt/divvun*/.*')
 	COPY_TEMPLATES+=pythonpath/libdivvun.py
 	COPY_TEMPLATES+=$(shell cd oxt && find pythonpath \( -type f -o -type l \) -name '_libdivvun*' -print)
 else
@@ -86,7 +86,7 @@ else
 endif
 
 EXTENSION_FILES=build/oxt/description.xml \
-	      $(patsubst %,build/oxt/%,$(STANDALONE_EXTENSION_FILES)) \
+	      $(patsubst %,build/%,$(STANDALONE_EXTENSION_FILES)) \
 	      $(patsubst %,build/oxt/%,$(COPY_TEMPLATES))
 
 # Targets
@@ -104,7 +104,7 @@ install-unpacked: extension-files
 	install -m 755 -d "$(DESTDIR)" "$(DESTDIR)/META-INF"
 	install -m 644 build/oxt/META-INF/manifest.xml "$(DESTDIR)/META-INF"
 	install -m 644 build/oxt/description.xml \
-	               $(patsubst %,build/oxt/%,$(STANDALONE_EXTENSION_FILES)) \
+	               $(patsubst %,build/%,$(STANDALONE_EXTENSION_FILES)) \
 	               $(patsubst %,build/oxt/%,$(COPY_TEMPLATES)) $(DESTDIR)
 
 # Sed scripts for modifying templates
@@ -126,7 +126,7 @@ $(patsubst %,build/oxt/%,$(COPY_TEMPLATES)): build/oxt/%: oxt/%
 	-$(MKDIR) $(subst /,$(PS),$(@D))
 	$(COPY) "$(subst /,$(PS),$^)" "$(subst /,$(PS),$@)"
 
-$(patsubst %,build/oxt/%,$(STANDALONE_EXTENSION_FILES)): build/oxt/%: %
+$(patsubst %,build/%,$(STANDALONE_EXTENSION_FILES)): build/%: %
 	-$(MKDIR) $(subst /,$(PS),$(@D))
 	$(COPYDIR) "$(subst /,$(PS),$^)" "$(subst /,$(PS),$@)"
 
