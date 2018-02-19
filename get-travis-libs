@@ -11,7 +11,11 @@ set -e -u
 zip="$(mktemp -t libreoffice-voikko-get-travis-libs.XXXXXXXXXXX)"
 cleanup () { rm -f "${zip}"; }
 trap cleanup EXIT
-wget "$1" -O "${zip}"
+if command -V curl 2>/dev/null >/dev/null; then
+    curl --progress "$1" > "${zip}"
+else
+    wget "$1" -O "${zip}"
+fi
 
 unzip -d divvun "${zip}"
 find divvun -name '_libdivvun*' -exec mv '{}' oxt/pythonpath/ \;
