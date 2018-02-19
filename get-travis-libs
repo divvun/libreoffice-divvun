@@ -14,3 +14,4 @@ trap cleanup EXIT
 wget "$1" -O "${zip}"
 
 unzip -d divvun "${zip}"
+find divvun -name '_libdivvun*' -exec mv '{}' oxt/pythonpath/ \;
