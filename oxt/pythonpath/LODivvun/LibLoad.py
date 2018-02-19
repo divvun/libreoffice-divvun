@@ -10,6 +10,7 @@
 # case the provisions of the GPL are applicable instead of those above.
 
 import os
+import re
 import uno
 import sys
 import platform
@@ -56,13 +57,24 @@ def loadLibs():
 	else:
 		logging.debug("Loading C libraries from search path {}".format(searchPath))
 	# Keep libdivvun.so last, since it depends on the others:
-	cnames = ["cg3", "archive", "hfst", "hfstospell", "pugixml", "divvun"]
+	cnames = ["cg3", "archive", "hfst", "hfstospell", "divvun"]
 	suffix = platformSuffix()
 	clibs = {}
 	loadingFailed = False
 	for libname in cnames:
+		matches = [f for f in os.listdir(searchPath)
+			   if re.match('^lib{}([.][0-9]+)?[.]{}'.format(libname, suffix), f)]
+		if matches == []:
+			msg = "Couldn't find lib{}.{} in search path {}!".format(libname, suffix, searchPath)
+			logging.warning(msg)
+			if not loadingFailed:
+				messageBox(msg)
+			loadingFailed = True
+			continue
 		try:
-			clibs[libname] = CDLL(os.path.join(searchPath, "lib{}.{}".format(libname, suffix)))
+			# Use the shortest match (ie. one with no version string if one exists)
+			libbase = sorted(matches, key=len)
+			clibs[libname] = CDLL(os.path.join(searchPath, libbase))
 		except OSError as e:
 			msg = "OSError on loading C library {}: {}".format(libname, e)
 			logging.warning(msg)
