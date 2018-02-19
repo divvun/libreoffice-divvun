@@ -73,7 +73,7 @@ def loadLibs():
 			continue
 		try:
 			# Use the shortest match (ie. one with no version string if one exists)
-			libbase = sorted(matches, key=len)
+			libbase = sorted(matches, key=len)[0]
 			clibs[libname] = CDLL(os.path.join(searchPath, libbase))
 		except OSError as e:
 			msg = "OSError on loading C library {}: {}".format(libname, e)
