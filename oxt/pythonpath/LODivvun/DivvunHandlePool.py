@@ -356,12 +356,18 @@ class DivvunHandlePool:
 	def __openHandleWithVariant(self, language, fullVariant):
 		logging.debug("DivvunHandlePool.__openHandleWithVariant")
 		try:
-			# TODO: send self.getDictionaryPath() to libdivvun and let it discover installed dictionaries?
-			allLangs = libdivvun.listLangs()
+			extraPath = self.getDictionaryPath()
+			logging.info("Listing langs including getDictionaryPath={}".format(extraPath))
+			allLangs = libdivvun.listLangs(extraPath)
+			logging.info("Found {} languages: {}".format(len(allLangs), allLangs.keys()))
 			if not language in allLangs:
-				raise Exception("Couldn't find data for language {}".format(language))
+				msg = "Couldn't find data for language {}".format(language)
+				logging.info(msg)
+				raise Exception(msg)
 			# We assume the first matching spec for a language is the preferred (e.g. from user dir)
+			logging.info("len: {}".format(len(allLangs[language])))
 			specpath = allLangs[language][0]
+			logging.info("specpath="+specpath)
 			logging.info("Loading language {} with spec from {}".format(language, specpath))
 			# TODO: Any reason to support non-archive specs here?
 			spec = libdivvun.ArCheckerSpec(specpath)
