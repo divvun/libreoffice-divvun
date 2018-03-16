@@ -3,6 +3,10 @@
 # To run with full debug output, and without opening a window:
 # $ PYUNO_LOGLEVEL=ARGS ./kbu-build --headless
 
+# To create a standalone extension, first run ./get-travis-libs (see
+# that file for usage), then do:
+# STANDALONE_EXTENSION=1 PYUNO_LOGLEVEL=ARGS ./kbu-build --headless
+
 
 ### PYTHONPATH doesn't seem to be necessary if the libdivvun files are
 ### in oxt/pythonpath and mentioned in the SRC_AND_DIST variable in
@@ -48,6 +52,3 @@ soffice "$@" sme.odt 2>&1 | awk '
           { print }
 '
 
-# Fixing Mac libs:
-# otool -L oxt/pythonpath/_libdivvun.cpython-3.5m.so
-# install_name_tool -change /path/to/libdivvun.0.dylib @loader_path/../divvun/Darwin-64bit-/libdivvun.dylib oxt/pythonpath/_libdivvun.cpython-3.5m.so
