@@ -3,16 +3,26 @@
 # To run with full debug output, and without opening a window:
 # $ PYUNO_LOGLEVEL=ARGS ./kbu-build --headless
 
-# To create a standalone extension, first run ./get-travis-libs (see
-# that file for usage), then do:
-# STANDALONE_EXTENSION=1 PYUNO_LOGLEVEL=ARGS ./kbu-build --headless
+# To create a standalone extension, first find the macos libs from the
+# newest successful OSX+Clang build of master on
+# https://travis-ci.org/divvun/libdivvun/builds and scroll down the
+# log to the transfer.sh url, then run e.g.
+#
+# $ ./get-travis-libs https://transfer.sh/dUPaP/Darwin-64bit-.zip
+#
+# Now put any zcheck files you want bundled into the divvun folder:
+#
+# $ mkdir -p divvun
+# $ cp /usr/share/voikko/4/se.zcheck divvun/
+#
+# Then build everything with:
+#
+# $ STANDALONE_EXTENSION=1 PYUNO_LOGLEVEL=ARGS ./kbu-build --headless
 
 
-### PYTHONPATH doesn't seem to be necessary if the libdivvun files are
-### in oxt/pythonpath and mentioned in the SRC_AND_DIST variable in
-### Makefile. OTOH, we need the C lib available too, and libdivvun
-### installs that, so might as well keep them separate.
-
+# If we're *not* building a standalone extension, we have to make
+# either install libdivvun under /usr or ensure it's available in the
+# various paths:
 if [[ -z $STANDALONE_EXTENSION ]]; then
     set -x
     export LD_LIBRARY_PATH="$HOME/PREFIX/gtd-gc/lib"
@@ -24,9 +34,6 @@ set -e -u
 
 # For Mac-building:
 PATH="/Applications/LibreOffice.app/Contents/MacOS/:$PATH"
-
-# cp ~/src/divvun-suggest/python/libdivvun.py oxt/pythonpath/
-# cp ~/src/divvun-suggest/python/_libdivvun.cpython-36m-x86_64-linux-gnu.so oxt/pythonpath/
 
 make clean
 make
@@ -51,4 +58,3 @@ soffice "$@" sme.odt 2>&1 | awk '
     color { printf "\033["color"m%s\033[0m\n", $0; next }
           { print }
 '
-
