@@ -395,6 +395,9 @@ class DivvunHandlePool:
 				return handle
 		return self.__openHandleWithVariant(language, language)
 
+	def getOpenHandles(self):
+		return self.__handles
+
 	def getHandle(self, locale):
 		language = None
 		if locale.Language == "qlt":

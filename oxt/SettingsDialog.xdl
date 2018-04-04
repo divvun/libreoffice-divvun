@@ -12,9 +12,20 @@
     <dlg:fixedline dlg:id="topLine" dlg:left="6" dlg:top="4" dlg:width="248"
                    dlg:height="10" dlg:value="&amp;13.divvunasetukset.topLine.Label"/>
     <dlg:titledbox dlg:id="vocabularyFrame" dlg:left="12" dlg:top="15"
+
                    dlg:width="236" dlg:height="30">
       <dlg:title dlg:value="&amp;12.divvunasetukset.vocabularyFrame.Label"/>
       <dlg:menulist dlg:id="variant" dlg:left="5" dlg:top="12" dlg:width="200"
+                    dlg:height="13" dlg:spin="true" dlg:linecount="4"
+                    dlg:tab-index="0">
+        <dlg:menupopup>
+        </dlg:menupopup>
+      </dlg:menulist>
+    </dlg:titledbox>
+    <dlg:titledbox dlg:id="gcFrame" dlg:left="12" dlg:top="30"
+                   dlg:width="236" dlg:height="30">
+      <dlg:title dlg:value="&amp;12.divvunasetukset.gcFrame.Label"/>
+      <dlg:menulist dlg:id="gcmenulist" dlg:left="5" dlg:top="12" dlg:width="200"
                     dlg:height="13" dlg:spin="true" dlg:linecount="4"
                     dlg:tab-index="0">
         <dlg:menupopup>
