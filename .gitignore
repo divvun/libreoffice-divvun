@@ -5,3 +5,5 @@ voikko
 /oxt/pythonpath/_libdivvun.cpython-36m-x86_64-linux-gnu.so
 /oxt/pythonpath/libdivvun.py
 **/__pycache__/
+/oxt/pythonpath/_libdivvun.*.so
+/oxt/divvun/
