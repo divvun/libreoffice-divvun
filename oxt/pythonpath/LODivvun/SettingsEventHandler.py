@@ -66,48 +66,48 @@ class SettingsEventHandler(unohelper.Base, XServiceInfo, XContainerWindowEventHa
 
 	def __initOptionsWindowFromRegistry(self, window):
 		logging.debug("initOptionsWindowFromRegistry()");
-		hyphWordPartsValue = False
-		hyphUnknownWordsValue = True
-		try:
-			hyphWordPartsValue = PropertyManager.getInstance().readFromRegistry("/no.divvun.gramcheck.Config/hyphenator",  "hyphWordParts")
-			hyphUnknownWordsValue = PropertyManager.getInstance().readFromRegistry("/no.divvun.gramcheck.Config/hyphenator", "hyphUnknownWords")
-		except UnknownPropertyException as e:
-			logging.exception("SettingsEventHandler: UnknownPropertyException", e)
-			return
-		logging.debug("hyphWordParts = " + str(hyphWordPartsValue))
-		hyphWordParts = window.getControl("hyphWordParts")
+		# hyphWordPartsValue = False
+		# hyphUnknownWordsValue = True
+		# try:
+		# 	hyphWordPartsValue = PropertyManager.getInstance().readFromRegistry("/no.divvun.gramcheck.Config/hyphenator",  "hyphWordParts")
+		# 	hyphUnknownWordsValue = PropertyManager.getInstance().readFromRegistry("/no.divvun.gramcheck.Config/hyphenator", "hyphUnknownWords")
+		# except UnknownPropertyException as e:
+		# 	logging.exception("SettingsEventHandler: UnknownPropertyException", e)
+		# 	return
+		# logging.debug("hyphWordParts = " + str(hyphWordPartsValue))
+		# hyphWordParts = window.getControl("hyphWordParts")
 
-		hyphWordPartsProps = hyphWordParts.getModel()
-		hyphWordPartsProps.setPropertyValue("State", 1 if hyphWordPartsValue else 0)
+		# hyphWordPartsProps = hyphWordParts.getModel()
+		# hyphWordPartsProps.setPropertyValue("State", 1 if hyphWordPartsValue else 0)
 
-		hyphUnknownWords = window.getControl("hyphUnknownWords")
-		hyphUnknownWordsProps = hyphUnknownWords.getModel()
-		hyphUnknownWordsProps.setPropertyValue("State", 1 if hyphUnknownWordsValue else 0)
+		# hyphUnknownWords = window.getControl("hyphUnknownWords")
+		# hyphUnknownWordsProps = hyphUnknownWords.getModel()
+		# hyphUnknownWordsProps.setPropertyValue("State", 1 if hyphUnknownWordsValue else 0)
 
-		self.__initVariantDropdown(window)
+		# self.__initVariantDropdown(window)
 		self.__initGcDropdown(window)
 
 	def __saveOptionsFromWindowToRegistry(self, window):
 		logging.debug("SettingsEventHandler.__saveOptionsFromWindowToRegistry")
 
-		hyphWordParts = window.getControl("hyphWordParts")
-		hyphWordPartsProps = hyphWordParts.getModel()
-		hyphWordPartsValue = hyphWordPartsProps.getPropertyValue("State") # 0 = unchecked, 1 = checked
+		# hyphWordParts = window.getControl("hyphWordParts")
+		# hyphWordPartsProps = hyphWordParts.getModel()
+		# hyphWordPartsValue = hyphWordPartsProps.getPropertyValue("State") # 0 = unchecked, 1 = checked
 
-		hyphUnknownWords = window.getControl("hyphUnknownWords")
-		hyphUnknownWordsProps = hyphUnknownWords.getModel()
-		hyphUnknownWordsValue = hyphUnknownWordsProps.getPropertyValue("State") # 0 = unchecked, 1 = checked
+		# hyphUnknownWords = window.getControl("hyphUnknownWords")
+		# hyphUnknownWordsProps = hyphUnknownWords.getModel()
+		# hyphUnknownWordsValue = hyphUnknownWordsProps.getPropertyValue("State") # 0 = unchecked, 1 = checked
 
-		rootView = PropertyManager.getRegistryProperties("/no.divvun.gramcheck.Config/hyphenator")
-		rootView.setHierarchicalPropertyValue("hyphWordParts", hyphWordPartsValue == 1)
-		rootView.setHierarchicalPropertyValue("hyphUnknownWords", hyphUnknownWordsValue == 1)
-		rootView.commitChanges()
+		# rootView = PropertyManager.getRegistryProperties("/no.divvun.gramcheck.Config/hyphenator")
+		# rootView.setHierarchicalPropertyValue("hyphWordParts", hyphWordPartsValue == 1)
+		# rootView.setHierarchicalPropertyValue("hyphUnknownWords", hyphUnknownWordsValue == 1)
+		# rootView.commitChanges()
 
-		# dictionary variant
-		variantValue = self.__getSelectedVariant(window)
-		rootView = PropertyManager.getRegistryProperties("/no.divvun.gramcheck.Config/dictionary")
-		rootView.setHierarchicalPropertyValue("variant", variantValue)
-		rootView.commitChanges()
+		# # dictionary variant
+		# variantValue = self.__getSelectedVariant(window)
+		# rootView = PropertyManager.getRegistryProperties("/no.divvun.gramcheck.Config/dictionary")
+		# rootView.setHierarchicalPropertyValue("variant", variantValue)
+		# rootView.commitChanges()
 
 		# dictionary gcsetting
 		gcsettingValue = self.__getSelectedGcsetting(window)
@@ -159,13 +159,17 @@ class SettingsEventHandler(unohelper.Base, XServiceInfo, XContainerWindowEventHa
 			# languages, then those of the UI language, so
 			# the UI language explanations are preferred:
 			uilang, otherlangs = partition(prefs.items(), lambda lp: lp[0] == uilocale.Language)
-			toggleIds.update(otherlangs)
-			toggleIds.update(uilang)
+			logging.info("KBU: prefs of checker for lang {} has uilang {}".format(checklang, uilang))
+			logging.info("KBU: prefs of checker for lang {} has otherlangs {}".format(checklang, otherlangs))
+			for _l, p in otherlangs:
+				toggleIds.update(p.toggleIds)
+			for _l, p in uilang:
+				toggleIds.update(p.toggleIds)
 		logging.info("KBU: prefs of checker for lang {} has toggleIds {}".format(checklang, toggleIds))
-		variantDropdown = windowContainer.getControl("gcmenulist")
+		variantDropdown = windowContainer.getControl("toggleIds")
 		variantProps = variantDropdown.getModel()
 
-		gcsettings = ["do thing", "don't do thing"]
+		gcsettings = toggleIds.values()
 		uno.invoke(variantProps, "setPropertyValue", ("StringItemList", uno.Any("[]string", tuple(gcsettings))))
 
 		# read selected dictionary variant from registry
@@ -212,7 +216,7 @@ class SettingsEventHandler(unohelper.Base, XServiceInfo, XContainerWindowEventHa
 
 
 	def __getSelectedGcsetting(self, windowContainer):
-		gcsettingDropdown = windowContainer.getControl("gcmenulist")
+		gcsettingDropdown = windowContainer.getControl("toggleIds")
 		gcsettingProps = gcsettingDropdown.getModel()
 
 		# get all values
