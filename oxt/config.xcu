@@ -8,8 +8,8 @@
     <prop oor:name="variant" oor:type="xs:string">
       <value>standard</value>
     </prop>
-    <prop oor:name="gcsetting" oor:type="xs:string">
-      <value>fookbu</value>
+    <prop oor:name="gcignored" oor:type="xs:string">
+      <value></value>
     </prop>
   </node>
   <node oor:name="hyphenator">

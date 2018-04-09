@@ -9,7 +9,7 @@
   <component>
     <group oor:name="dictionary">
       <prop oor:name="variant" oor:type="xs:string"/>
-      <prop oor:name="gcsetting" oor:type="xs:string"/>
+      <prop oor:name="gcignored" oor:type="xs:string"/>
     </group>
     <group oor:name="hyphenator">
       <prop oor:name="hyphWordParts" oor:type="xs:boolean"/>
