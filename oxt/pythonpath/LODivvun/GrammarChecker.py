@@ -19,11 +19,18 @@ from LODivvun.DivvunHandlePool import DivvunHandlePool
 from LODivvun.PropertyManager import PropertyManager
 import libdivvun
 
+try:
+    from typing import Set, List, Tuple, Dict, Any     # flake8: noqa
+except ImportError:
+    pass
+
 class GrammarChecker(unohelper.Base, XServiceInfo, XProofreader, XInitialization, XServiceDisplayName):
 
 	def __init__(self, ctx, *args):
 		logging.debug("GrammarChecker.__init__")
-		self.__ignoredErrors = set() # Grammar checker error codes that should be ignored
+		registryRaw = PropertyManager.getInstance().readFromRegistry("/no.divvun.gramcheck.Config/dictionary", "gcignored")
+		logging.debug("KBU: GrammarChecker read gcignored registryRaw {}".format(registryRaw))
+		self.__ignoredErrors = set(registryRaw.split()) # type: Set[str]
 		logging.debug("GrammarChecker.__init__ done")
 
 	# From XServiceInfo
@@ -92,8 +99,7 @@ class GrammarChecker(unohelper.Base, XServiceInfo, XProofreader, XInitialization
 						dError.rep)
 				ruleIdentifier = dError.err
 				if ruleIdentifier in self.__ignoredErrors:
-					# ignore this dError
-					logging.info("ignored")
+					logging.debug("Ignored error with rule " + ruleIdentifier)
 					continue
 
 				suggestions = dError.rep
@@ -124,10 +130,12 @@ class GrammarChecker(unohelper.Base, XServiceInfo, XProofreader, XInitialization
 			DivvunHandlePool.mutex.release()
 
 	def ignoreRule(self, ruleIdentifier, locale):
+		logging.debug("Ignoring rule " + ruleIdentifier)
 		self.__ignoredErrors.add(ruleIdentifier)
 
 	def resetIgnoreRules(self):
-		ignoredErrors.clear()
+		logging.debug("Reset ignored rules")
+		self.__ignoredErrors.clear()
 
 	# From XInitialization
 	def initialize(self):

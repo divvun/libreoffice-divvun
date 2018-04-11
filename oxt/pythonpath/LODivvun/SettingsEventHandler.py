@@ -68,15 +68,20 @@ are loaded (and if UI locale changes, though that's not too bad)
 	for checklang, checker in handles.items():
 		prefs = libdivvun.prefs_bytes(checker)
 		logging.info("KBU: prefs of checker for lang {} has pref l18n langs {}".format(checklang, prefs.keys()))
-		# First add explanations from the other
-		# languages, then those of the UI language, so
-		# the UI language explanations are preferred:
-		uilang, otherlangs = partition(prefs.items(), lambda lp: lp[0] == uilocale.Language)
-		logging.info("KBU: prefs of checker for lang {} has uilang {}".format(checklang, uilang))
-		logging.info("KBU: prefs of checker for lang {} has otherlangs {}".format(checklang, otherlangs))
-		for _l, p in otherlangs:
+		# First add explanations from the other languages,
+		# then those of the checker, then the UI language, so
+		# the UI and checker language explanations are
+		# preferred:
+		p_uilang, p_notui = partition(prefs.items(), lambda lp: lp[0] == uilocale.Language)
+		p_checklang, p_notcheckui = partition(p_notui, lambda lp: lp[0] == checklang)
+		logging.info("KBU: prefs of checker for lang {} has p_uilang {}".format(checklang, p_uilang))
+		logging.info("KBU: prefs of checker for lang {} has p_checklang {}".format(checklang, p_checklang))
+		logging.info("KBU: prefs of checker for lang {} has p_notcheckui {}".format(checklang, p_notcheckui))
+		for _l, p in p_notcheckui:
 			toggleIds.update(p.toggleIds)
-		for _l, p in uilang:
+		for _l, p in p_checklang:
+			toggleIds.update(p.toggleIds)
+		for _l, p in p_uilang:
 			toggleIds.update(p.toggleIds)
 	logging.info("KBU: prefs of checker for lang {} has toggleIds {}".format(checklang, toggleIds))
 	return toggleIds
@@ -89,7 +94,7 @@ class SettingsEventHandler(unohelper.Base, XServiceInfo, XContainerWindowEventHa
 		# Since listbox only stores msg, not error id, we set
 		# this on init here, expecting user to restart LO if they
 		# install a new language pack
-		self.__toggleIds = list(getToggleIds().items())	 # type: List[Tuple[str, str]]
+		self.__toggleIds = sorted(list(getToggleIds().items()), key=lambda x:x[1])  # type: List[Tuple[str, str]]
 		self.__idxToToggleId = dict(enumerate(self.__toggleIds))  # type: Dict[int, Tuple[str, str]]
 		self.__dictionaryVariantList = ["standard: standard dictionary"]
 

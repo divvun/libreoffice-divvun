@@ -16,6 +16,11 @@ from collections import defaultdict
 from threading import RLock
 from com.sun.star.lang import Locale
 
+try:
+    from typing import Set, List, Tuple, Dict, Any     # flake8: noqa
+except ImportError:
+    pass
+
 import libdivvun
 
 class Bcp47ToLoMapping:
@@ -325,13 +330,15 @@ BCP_ADVERTISE_WITHOUT_COUNTRY = [
 ]
 
 class DivvunHandlePool:
+	instance = None
+	mutex = RLock()
 
 	def __init__(self):
-		self.__supportedSpellingLocales = []
-		self.__supportedHyphenationLocales = []
-		self.__supportedGrammarCheckingLocales = []
+		self.__supportedSpellingLocales = []         # type: List[Locale]
+		self.__supportedHyphenationLocales = []      # type: List[Locale]
+		self.__supportedGrammarCheckingLocales = []  # type: List[Locale]
 		self.__installationPath = None
-		self.__handles = {}
+		self.__handles = {}  # type: List[libdivvun.CheckerUniquePtr]
 		self.__initializationErrors = {}
 		self.__globalBooleanOptions = {}
 		self.__globalIntegerOptions = {}
@@ -341,11 +348,11 @@ class DivvunHandlePool:
 			self.__bcpToOOoMap[m.bcpTag].append(m)
 		self.__bcpAdvertiseWithoutCountry = set(BCP_ADVERTISE_WITHOUT_COUNTRY)
 
-	def getInstance():
+	@classmethod
+	def getInstance(cls):
 		if DivvunHandlePool.instance is None:
 			DivvunHandlePool.instance = DivvunHandlePool()
 		return DivvunHandlePool.instance
-	getInstance = staticmethod(getInstance)
 
 	def getInstallationPath(self):
 		return self.__installationPath
@@ -529,5 +536,3 @@ class DivvunHandlePool:
 	def supportsGrammarLocale(self, locale):
 		return self.__containsLocale(locale, self.getSupportedGrammarLocales())
 
-DivvunHandlePool.instance = None
-DivvunHandlePool.mutex = RLock()
