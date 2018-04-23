@@ -17,9 +17,9 @@ from threading import RLock
 from com.sun.star.lang import Locale
 
 try:
-    from typing import Set, List, Tuple, Dict, Any     # flake8: noqa
+	from typing import Set, List, Tuple, Dict, Any     # flake8: noqa
 except ImportError:
-    pass
+	pass
 
 import libdivvun
 

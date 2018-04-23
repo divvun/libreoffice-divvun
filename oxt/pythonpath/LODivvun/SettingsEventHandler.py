@@ -19,15 +19,16 @@ from com.sun.star.awt import XContainerWindowEventHandler
 from com.sun.star.beans import UnknownPropertyException
 from com.sun.star.beans import PropertyValue as __property__
 from com.sun.star.lang import Locale
+
 from LODivvun.PropertyManager import PropertyManager
 from LODivvun.DivvunHandlePool import DivvunHandlePool
+import libdivvun
 
 try:
-    from typing import Set, List, Tuple, Dict, Any     # flake8: noqa
+	from typing import TypeVar, Set, List, Tuple, Dict, Callable, Any     # flake8: noqa
+	T = TypeVar('T')
 except ImportError:
-    pass
-
-import libdivvun
+	pass
 
 
 def __getprop__(name, value):
@@ -35,7 +36,7 @@ def __getprop__(name, value):
 	return p
 
 
-def partition(lst, pred):
+def partition(lst, pred):	# type: (List[T], Callable[[T], bool]) -> Tuple[List[T], List[T]]
 	good, bad = [], []
 	for x in lst:
 		if pred(x):
@@ -45,7 +46,7 @@ def partition(lst, pred):
 	return good, bad
 
 
-def getUILocale():
+def getUILocale():		# type: () -> Locale
 	provider = uno.getComponentContext().getValueByName("/singletons/com.sun.star.configuration.theDefaultProvider")
 	l10n = provider.createInstanceWithArguments("com.sun.star.configuration.ConfigurationAccess",
 						    (__getprop__("nodepath", "/org.openoffice.Setup/L10N"),))
@@ -53,7 +54,7 @@ def getUILocale():
 	return Locale(uilocaleRaw.split('-')[0], uilocaleRaw.split('-')[1], '')
 
 
-def getToggleIds():
+def getToggleIds():		# type: () -> Dict[str, str]
 	"""Return the toggleIds of currently opened checker handles.
 
 Don't cache this – the result may change if more handles (checkers)
@@ -85,6 +86,26 @@ are loaded (and if UI locale changes, though that's not too bad)
 			toggleIds.update(p.toggleIds)
 	logging.info("KBU: prefs of checker for lang {} has toggleIds {}".format(checklang, toggleIds))
 	return toggleIds
+
+
+def readIgnoredRules():		# type: () -> Set[str]
+	"""Read ignored rule identifiers from registry"""
+	try:
+		registryRaw = PropertyManager.getInstance().readFromRegistry("/no.divvun.gramcheck.Config/dictionary", "gcignored")
+		logging.debug("KBU: Read gcignored registryRaw {}".format(registryRaw))
+		return set(registryRaw.split())
+	except UnknownPropertyException as e:
+		logging.exception(e)
+		return set()
+
+
+def saveIgnoredRules(ignoredRules):  # type: (Set[str]) -> None
+	"""Save ignored rule identifiers to registry"""
+	gcsettingTids = " ".join(ignoredRules)
+	rootView = PropertyManager.getRegistryProperties("/no.divvun.gramcheck.Config/dictionary")
+	rootView.setHierarchicalPropertyValue("gcignored", gcsettingTids)
+	logging.debug("KBU: gcignored registry set to {}".format(gcsettingTids))
+	rootView.commitChanges()
 
 
 class SettingsEventHandler(unohelper.Base, XServiceInfo, XContainerWindowEventHandler):
@@ -131,42 +152,25 @@ class SettingsEventHandler(unohelper.Base, XServiceInfo, XContainerWindowEventHa
 	def __saveOptionsFromWindowToRegistry(self, window):
 		logging.debug("SettingsEventHandler.__saveOptionsFromWindowToRegistry")
 		gcsettingValue = set(idx for idx, _msg in self.__getSelectedGcsetting(window))
-		gcsettingTids = " ".join(tid
-					 for i,(tid,_msg)
-					 in self.__idxToToggleId.items()
-					 if i in gcsettingValue)
-		rootView = PropertyManager.getRegistryProperties("/no.divvun.gramcheck.Config/dictionary")
-		rootView.setHierarchicalPropertyValue("gcignored", gcsettingTids)
-		logging.debug("KBU: gcignored registry set to {}".format(gcsettingTids))
-		rootView.commitChanges()
-
-	def __initVariantDropdown(self, windowContainer):
-		variantDropdown = windowContainer.getControl("variant")
-		variantProps = variantDropdown.getModel()
-
-		# populate dropdown list with available variants
-		self.__initAvailableVariants()
-		uno.invoke(variantProps, "setPropertyValue", ("StringItemList", uno.Any("[]string", tuple(self.__dictionaryVariantList))))
-
-		# read selected dictionary variant from registry
-		registryVariantValue = "standard"
-		try:
-			registryVariantValue = PropertyManager.getInstance().readFromRegistry("/no.divvun.gramcheck.Config/dictionary", "variant")
-		except UnknownPropertyException as e:
-			logging.exception(e)
-			return
-		registryVariantValue = registryVariantValue + ": "
-		selectedValues = [0]
-		for i, dVariant in enumerate(self.__dictionaryVariantList):
-			if dVariant.startswith(registryVariantValue):
-				selectedValues[0] = i;
-				break;
-
-		# set the selected item in the dropdown list
-		uno.invoke(variantProps, "setPropertyValue", ("SelectedItems", uno.Any("[]short", tuple(selectedValues))))
-
+		ignoredRules = set(tid
+				   for i,(tid,_msg)
+				   in self.__idxToToggleId.items()
+				   if i in gcsettingValue)
+		saveIgnoredRules(ignoredRules)
 
 	def __initGcDropdown(self, windowC):
+		boxC = windowC.getControl("toggleIds")
+		boxM = boxC.getModel()
+		toggleMsgs = tuple([msg for _tid,msg in self.__toggleIds])
+		uno.invoke(boxM, "setPropertyValue", ("StringItemList", uno.Any("[]string", toggleMsgs)))
+		registryIgnored = readIgnoredRules()
+		selectedValues = set(i
+				     for i,(tid,_msg)
+				     in self.__idxToToggleId.items()
+				     if tid in registryIgnored)
+		uno.invoke(boxM, "setPropertyValue", ("SelectedItems", uno.Any("[]short", tuple(selectedValues))))
+
+	# def __initGcDropdownFailedAttempts(self, windowC):
 		# windowM = windowC.getModel()
 		# logging.info("KBU: windowM:")
 		# logging.info(windowM)
@@ -178,8 +182,8 @@ class SettingsEventHandler(unohelper.Base, XServiceInfo, XContainerWindowEventHa
 		# logging.info(windowM.getSupportedServiceNames())
 		# logging.info("KBU: /windowM")
 
-		boxC = windowC.getControl("toggleIds")
-		boxM = boxC.getModel()
+		# boxC = windowC.getControl("toggleIds")
+		# boxM = boxC.getModel()
 		# logging.info("KBU: boxM:")
 		# logging.info(boxM)
 		# logging.info("KBU: boxM.getTypes:")
@@ -190,10 +194,8 @@ class SettingsEventHandler(unohelper.Base, XServiceInfo, XContainerWindowEventHa
 		# logging.info(boxM.getSupportedServiceNames())
 		# logging.info("KBU: /boxM")
 
-		boxC = windowC.getControl("toggleIds")
-		boxM = boxC.getModel()
-		toggleMsgs = tuple([msg for _tid,msg in self.__toggleIds])
-		uno.invoke(boxM, "setPropertyValue", ("StringItemList", uno.Any("[]string", toggleMsgs)))
+		# toggleMsgs = tuple([msg for _tid,msg in self.__toggleIds])
+		# uno.invoke(boxM, "setPropertyValue", ("StringItemList", uno.Any("[]string", toggleMsgs)))
 
 		# ctx = uno.getComponentContext()
 		# cb1 = ctx.ServiceManager.createInstanceWithContext("com.sun.star.form.component.CheckBox", ctx)
@@ -213,48 +215,6 @@ class SettingsEventHandler(unohelper.Base, XServiceInfo, XContainerWindowEventHa
 		# 	wname = "toggleId-"+tid;
 		# 	windowM.insertByName(wname, cb)
 		# 	# logging.info("KBU: Control: {}".format(windowC.getControl(wname).getModel().PositionX))
-
-		# read selected dictionary variant from registry
-		registryIgnored = set()	 # type: Set[str]
-		try:
-			registryRaw = PropertyManager.getInstance().readFromRegistry("/no.divvun.gramcheck.Config/dictionary", "gcignored")
-
-			logging.debug("KBU: gcignored registryRaw {}".format(registryRaw))
-			registryIgnored = set(registryRaw.split())
-		except UnknownPropertyException as e:
-			logging.exception(e)
-			return
-		selectedValues = set(i
-				     for i,(tid,_msg)
-				     in self.__idxToToggleId.items()
-				     if tid in registryIgnored)
-		uno.invoke(boxM, "setPropertyValue", ("SelectedItems", uno.Any("[]short", tuple(selectedValues))))
-
-	def __initAvailableVariants(self):
-		# dicts = libdivvun.listDicts(DivvunHandlePool.getInstance().getDictionaryPath())
-		# dicts = []
-		self.__dictionaryVariantList = ["kbu: TODO"]
-		# for vDict in dicts:
-			# dictName = vDict.variant + ": " + vDict.description
-			# self.__dictionaryVariantList.append(dictName)
-
-	def __getSelectedVariant(self, windowContainer):
-		variantDropdown = windowContainer.getControl("variant")
-		variantProps = variantDropdown.getModel()
-
-		# get all values
-		stringListValue = variantProps.getPropertyValue("StringItemList")
-
-		# get the selected item index
-		selectedValues = variantProps.getPropertyValue("SelectedItems")
-
-		# parse the variant id from the string
-		selectedValue = stringListValue[selectedValues[0]]
-		if ":" in selectedValue:
-			return selectedValue[0:selectedValue.find(":")]
-		logging.error("Failed to get the selected variant, returning default")
-		return "standard"
-
 
 	def __getSelectedGcsetting(self, windowContainer):
 		gcsettingDropdown = windowContainer.getControl("toggleIds")

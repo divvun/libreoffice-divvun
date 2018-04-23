@@ -15,23 +15,16 @@ from com.sun.star.linguistic2 import XProofreader, ProofreadingResult, SinglePro
 from com.sun.star.lang import XServiceInfo, XInitialization, XServiceDisplayName
 from com.sun.star.beans import PropertyValue
 from com.sun.star.text.TextMarkupType import PROOFREADING
+
 from LODivvun.DivvunHandlePool import DivvunHandlePool
 from LODivvun.PropertyManager import PropertyManager
+from LODivvun.SettingsEventHandler import readIgnoredRules, saveIgnoredRules
 import libdivvun
-
-try:
-    from typing import Set, List, Tuple, Dict, Any     # flake8: noqa
-except ImportError:
-    pass
 
 class GrammarChecker(unohelper.Base, XServiceInfo, XProofreader, XInitialization, XServiceDisplayName):
 
 	def __init__(self, ctx, *args):
 		logging.debug("GrammarChecker.__init__")
-		registryRaw = PropertyManager.getInstance().readFromRegistry("/no.divvun.gramcheck.Config/dictionary", "gcignored")
-		logging.debug("KBU: GrammarChecker read gcignored registryRaw {}".format(registryRaw))
-		self.__ignoredErrors = set(registryRaw.split()) # type: Set[str]
-		logging.debug("GrammarChecker.__init__ done")
 
 	# From XServiceInfo
 	def getImplementationName(self):
@@ -65,6 +58,11 @@ class GrammarChecker(unohelper.Base, XServiceInfo, XProofreader, XInitialization
 		result.nStartOfSentencePosition = nStartOfSentencePos
 		result.nBehindEndOfSentencePosition = nSuggestedBehindEndOfSentencePosition
 		result.xProofreader = self
+		# We read from registry on each check – it probably
+		# doesn't change most of the time, but it *can* change
+		# if user edited the plugin options, so this is at
+		# least safe:
+		ignoredRules = readIgnoredRules()
 
 		DivvunHandlePool.mutex.acquire()
 		try:
@@ -98,7 +96,7 @@ class GrammarChecker(unohelper.Base, XServiceInfo, XProofreader, XInitialization
 						dError.beg, dError.end,
 						dError.rep)
 				ruleIdentifier = dError.err
-				if ruleIdentifier in self.__ignoredErrors:
+				if ruleIdentifier in ignoredRules:
 					logging.debug("Ignored error with rule " + ruleIdentifier)
 					continue
 
@@ -131,11 +129,12 @@ class GrammarChecker(unohelper.Base, XServiceInfo, XProofreader, XInitialization
 
 	def ignoreRule(self, ruleIdentifier, locale):
 		logging.debug("Ignoring rule " + ruleIdentifier)
-		self.__ignoredErrors.add(ruleIdentifier)
+		ignoredRules = set([ruleIdentifier]).union(readIgnoredRules())
+		saveIgnoredRules(ignoredRules)
 
 	def resetIgnoreRules(self):
 		logging.debug("Reset ignored rules")
-		self.__ignoredErrors.clear()
+		saveIgnoredRules(set())
 
 	# From XInitialization
 	def initialize(self):
