@@ -129,7 +129,7 @@ class GrammarChecker(unohelper.Base, XServiceInfo, XProofreader, XInitialization
 
 	def ignoreRule(self, ruleIdentifier, locale):
 		logging.debug("Ignoring rule " + ruleIdentifier)
-		ignoredRules = set([ruleIdentifier]).union(readIgnoredRules())
+		ignoredRules = { ruleIdentifier }.union(readIgnoredRules())
 		saveIgnoredRules(ignoredRules)
 
 	def resetIgnoreRules(self):

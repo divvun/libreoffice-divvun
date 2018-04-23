@@ -112,12 +112,15 @@ class SettingsEventHandler(unohelper.Base, XServiceInfo, XContainerWindowEventHa
 
 	def __init__(self, ctx, *args):
 		print("SettingsEventHandler.__init__")
+		self.__initToggleIds()
+
+	def __initToggleIds(self):
 		# Since listbox only stores msg, not error id, we set
-		# this on init here, expecting user to restart LO if they
-		# install a new language pack
-		self.__toggleIds = sorted(list(getToggleIds().items()), key=lambda x:x[1])  # type: List[Tuple[str, str]]
-		self.__idxToToggleId = dict(enumerate(self.__toggleIds))  # type: Dict[int, Tuple[str, str]]
-		self.__dictionaryVariantList = ["standard: standard dictionary"]
+		# this on init here, expecting user to restart LO if
+		# they install a new language pack
+		toggleIds = getToggleIds()
+		stoggleIds = sorted(list(toggleIds.items()), key=lambda x:x[1])  # type: List[Tuple[str, str]]
+		self.__idxToToggleId = dict(enumerate(stoggleIds))  # type: Dict[int, Tuple[str, str]]
 
 	# From XServiceInfo
 	def getImplementationName(self):
@@ -151,23 +154,43 @@ class SettingsEventHandler(unohelper.Base, XServiceInfo, XContainerWindowEventHa
 
 	def __saveOptionsFromWindowToRegistry(self, window):
 		logging.debug("SettingsEventHandler.__saveOptionsFromWindowToRegistry")
-		gcsettingValue = set(idx for idx, _msg in self.__getSelectedGcsetting(window))
-		ignoredRules = set(tid
-				   for i,(tid,_msg)
-				   in self.__idxToToggleId.items()
-				   if i in gcsettingValue)
+		gcsettingValue = {idx for idx, _msg in self.__getSelectedGcsetting(window)}
+		# Here we assume the indexes in the shown list window correspond to those in self.__idxToToggleId
+		ignoredRules = {tid
+				for i,(tid,_msg)
+				in self.__idxToToggleId.items()
+				if i in gcsettingValue}
 		saveIgnoredRules(ignoredRules)
+
+	def __updateToggleIds(self, registryIgnored):  # type: (Set[str]) -> None
+		"""Add any ignored rules from registry with the rule identifier as message.
+
+		Sometimes the registry will have saved ignored rules
+		which are not returned from getToggleIds (e.g. if
+		errors.xml's did not describe all the possible rule
+		ids that the checker can create).
+
+		"""
+		existingTids = {tid for _i,(tid,_msg) in self.__idxToToggleId.items()}
+		ignoredButNoMsg = registryIgnored - existingTids
+		nextIdx = len(self.__idxToToggleId)
+		toAdd  = { i+nextIdx: (tid, tid) for i,tid in enumerate(ignoredButNoMsg)}
+		self.__idxToToggleId.update(toAdd)
 
 	def __initGcDropdown(self, windowC):
 		boxC = windowC.getControl("toggleIds")
 		boxM = boxC.getModel()
-		toggleMsgs = tuple([msg for _tid,msg in self.__toggleIds])
-		uno.invoke(boxM, "setPropertyValue", ("StringItemList", uno.Any("[]string", toggleMsgs)))
 		registryIgnored = readIgnoredRules()
-		selectedValues = set(i
-				     for i,(tid,_msg)
-				     in self.__idxToToggleId.items()
-				     if tid in registryIgnored)
+		self.__updateToggleIds(registryIgnored)
+		# Important: needs to be in the right order:
+		toggleMsgs = [msg
+			      for _i,(_tid,msg)
+			      in sorted(self.__idxToToggleId.items())]  # type: List[str]
+		uno.invoke(boxM, "setPropertyValue", ("StringItemList", uno.Any("[]string", tuple(toggleMsgs))))
+		selectedValues = {i
+				  for i,(tid,_msg)
+				  in self.__idxToToggleId.items()
+				  if tid in registryIgnored}	 # type: Set[int]
 		uno.invoke(boxM, "setPropertyValue", ("SelectedItems", uno.Any("[]short", tuple(selectedValues))))
 
 	# def __initGcDropdownFailedAttempts(self, windowC):
