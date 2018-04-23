@@ -62,7 +62,7 @@ class GrammarChecker(unohelper.Base, XServiceInfo, XProofreader, XInitialization
 		# doesn't change most of the time, but it *can* change
 		# if user edited the plugin options, so this is at
 		# least safe:
-		ignoredRules = readIgnoredRules()
+		ignoredRules = readIgnoredRules() # TODO: get from PropertyManager instead, see reloadDivvunSettings
 
 		DivvunHandlePool.mutex.acquire()
 		try:

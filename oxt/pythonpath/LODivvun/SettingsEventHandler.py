@@ -118,9 +118,7 @@ class SettingsEventHandler(unohelper.Base, XServiceInfo, XContainerWindowEventHa
 		# Since listbox only stores msg, not error id, we set
 		# this on init here, expecting user to restart LO if
 		# they install a new language pack
-		toggleIds = getToggleIds()
-		stoggleIds = sorted(list(toggleIds.items()), key=lambda x:x[1])  # type: List[Tuple[str, str]]
-		self.__idxToToggleId = dict(enumerate(stoggleIds))  # type: Dict[int, Tuple[str, str]]
+		self.__toggleIds = getToggleIds()
 
 	# From XServiceInfo
 	def getImplementationName(self):
@@ -154,12 +152,11 @@ class SettingsEventHandler(unohelper.Base, XServiceInfo, XContainerWindowEventHa
 
 	def __saveOptionsFromWindowToRegistry(self, window):
 		logging.debug("SettingsEventHandler.__saveOptionsFromWindowToRegistry")
-		gcsettingValue = {idx for idx, _msg in self.__getSelectedGcsetting(window)}
-		# Here we assume the indexes in the shown list window correspond to those in self.__idxToToggleId
+		gcsettingValue = {msg for _idx, msg in self.__getSelectedGcsetting(window)}
 		ignoredRules = {tid
-				for i,(tid,_msg)
-				in self.__idxToToggleId.items()
-				if i in gcsettingValue}
+				for (tid,msg)
+				in self.toggleIds.items()
+				if msg in gcsettingValue}
 		saveIgnoredRules(ignoredRules)
 
 	def __updateToggleIds(self, registryIgnored):  # type: (Set[str]) -> None
@@ -178,20 +175,32 @@ class SettingsEventHandler(unohelper.Base, XServiceInfo, XContainerWindowEventHa
 		self.__idxToToggleId.update(toAdd)
 
 	def __initGcDropdown(self, windowC):
-		boxC = windowC.getControl("toggleIds")
-		boxM = boxC.getModel()
+		ignoredM = windowC.getControl("toggleIdsIgnored").getModel()
+		includeM = windowC.getControl("toggleIdsInclude").getModel()
 		registryIgnored = readIgnoredRules()
 		self.__updateToggleIds(registryIgnored)
-		# Important: needs to be in the right order:
-		toggleMsgs = [msg
-			      for _i,(_tid,msg)
-			      in sorted(self.__idxToToggleId.items())]  # type: List[str]
-		uno.invoke(boxM, "setPropertyValue", ("StringItemList", uno.Any("[]string", tuple(toggleMsgs))))
-		selectedValues = {i
-				  for i,(tid,_msg)
-				  in self.__idxToToggleId.items()
-				  if tid in registryIgnored}	 # type: Set[int]
-		uno.invoke(boxM, "setPropertyValue", ("SelectedItems", uno.Any("[]short", tuple(selectedValues))))
+		# TODO: Some of these errors.xml messages have
+		# non-unique messages. Since there's no way for the
+		# user to differentiate them, we can't really do
+		# anything except conflate them – unless we append the
+		# tid to make them unique?
+		ignoredMsgs = set(msg
+				  for (tid, msg)
+				  in self.toggleIds.items()
+				  if tid in registryIgnored)
+		includeMsgs = set(msg
+				  for (tid, msg)
+				  in self.toggleIds.items()
+				  if tid not in registryIgnored)
+		uno.invoke(ignoredM, "setPropertyValue", ("StringItemList", uno.Any("[]string", tuple(ignoredMsgs))))
+		uno.invoke(includeM, "setPropertyValue", ("StringItemList", uno.Any("[]string", tuple(includeMsgs))))
+
+	def __getSelectedGcsetting(self, windowContainer):
+		gcsettingProps = windowContainer.getControl("toggleIds").getModel()
+		stringListValue = gcsettingProps.getPropertyValue("StringItemList")
+		selectedValues = gcsettingProps.getPropertyValue("SelectedItems")
+		logging.info("KBU: selectedValues {}".format(list((i, stringListValue[i]) for i in selectedValues)))
+		return list((i, stringListValue[i]) for i in selectedValues)
 
 	# def __initGcDropdownFailedAttempts(self, windowC):
 		# windowM = windowC.getModel()
@@ -238,14 +247,6 @@ class SettingsEventHandler(unohelper.Base, XServiceInfo, XContainerWindowEventHa
 		# 	wname = "toggleId-"+tid;
 		# 	windowM.insertByName(wname, cb)
 		# 	# logging.info("KBU: Control: {}".format(windowC.getControl(wname).getModel().PositionX))
-
-	def __getSelectedGcsetting(self, windowContainer):
-		gcsettingDropdown = windowContainer.getControl("toggleIds")
-		gcsettingProps = gcsettingDropdown.getModel()
-		stringListValue = gcsettingProps.getPropertyValue("StringItemList")
-		selectedValues = gcsettingProps.getPropertyValue("SelectedItems")
-		logging.info("KBU: selectedValues {}".format(list((i, stringListValue[i]) for i in selectedValues)))
-		return list((i, stringListValue[i]) for i in selectedValues)
 
 
 SettingsEventHandler.IMPLEMENTATION_NAME = "no.divvun.gramcheck.SettingsEventHandlerImplementation"

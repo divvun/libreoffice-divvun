@@ -2,9 +2,15 @@
 <!DOCTYPE dlg:window PUBLIC "-//OpenOffice.org//DTD OfficeDocument 1.0//EN" "dialog.dtd">
 <dlg:window xmlns:dlg="http://openoffice.org/2000/dialog" xmlns:script="http://openoffice.org/2000/script" dlg:id="divvunsettings" dlg:left="113" dlg:top="74" dlg:width="260" dlg:height="185" dlg:help-text="&amp;0.divvunasetukset.HelpText" dlg:closeable="true" dlg:moveable="true" dlg:title="&amp;1.divvunasetukset.Title" dlg:withtitlebar="false">
  <dlg:bulletinboard>
-  <dlg:titledbox dlg:id="toggleIdsTitle" dlg:tab-index="0" dlg:left="4" dlg:top="0" dlg:width="251" dlg:height="179">
-   <dlg:title dlg:value="Skip these checks (ctrl+click to select multiple)"/>
+  <dlg:titledbox dlg:id="toggleIdsIncludeTitle" dlg:tab-index="0" dlg:left="4" dlg:top="0" dlg:width="118" dlg:height="150">
+   <dlg:title dlg:value="Included checks:"/>
   </dlg:titledbox>
-  <dlg:menulist dlg:id="toggleIds" dlg:tab-index="1" dlg:left="8" dlg:top="8" dlg:width="244" dlg:height="167" dlg:multiselection="true"/>
+  <dlg:titledbox dlg:id="toggleIdsIgnoreTitle" dlg:tab-index="1" dlg:left="138" dlg:top="0" dlg:width="118" dlg:height="150">
+   <dlg:title dlg:value="Ignored checks:"/>
+  </dlg:titledbox>
+  <dlg:menulist dlg:id="toggleIdsInclude" dlg:tab-index="2" dlg:left="8" dlg:top="8" dlg:width="110" dlg:height="139" dlg:multiselection="true"/>
+  <dlg:menulist dlg:id="toggleIdsIgnore" dlg:tab-index="3" dlg:left="142" dlg:top="8" dlg:width="110" dlg:height="139" dlg:multiselection="true"/>
+  <dlg:button dlg:id="addIgnore" dlg:tab-index="4" dlg:left="124" dlg:top="52" dlg:width="11" dlg:height="11" dlg:value="→"/>
+  <dlg:button dlg:id="removeIgnore" dlg:tab-index="5" dlg:left="124" dlg:top="88" dlg:width="11" dlg:height="11" dlg:value="←"/>
  </dlg:bulletinboard>
 </dlg:window>
