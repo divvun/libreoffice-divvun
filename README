@@ -35,7 +35,7 @@ Requirements
 ============
 
 - LibreOffice 4.1 or later (must come with Python 3 or later)
-- libdivvun-gramcheck
+- libdivvun
 - Make, sed, find and zip for packaging.
 
 Instructions for packaging

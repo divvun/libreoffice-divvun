@@ -1,11 +1,10 @@
                       Libreoffice-divvun
 © 2005 - 2016 Harri Pitkänen (hatapitk@iki.fi)
 
-Spell checker, hyphenator and grammar checker for LibreOffice.
-This extension uses and may include libdivvun-gramcheck. For more
-information, see the copyright notices in the source code packages
-which should have been made available to you by the distributor of
-this program.
+Spell checker, hyphenator and grammar checker for LibreOffice. This
+extension uses and may include libdivvun. For more information, see
+the copyright notices in the source code packages which should have
+been made available to you by the distributor of this program.
 
 This program as a whole may be freely used, and it may be distributed
 under the GNU General Public License, version 3 or later (see below).

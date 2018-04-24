@@ -2,9 +2,9 @@
 
 # Usage:
 # Open the newest macos clang build job of divvun-suggest, e.g.
-# https://travis-ci.org/divvun/divvun-gramcheck/jobs/343314524
+# https://travis-ci.org/divvun/libdivvun/jobs/370142116
 # and run on the transfer.sh url from that page, e.g.
-# ./get-travis-libs https://transfer.sh/T3T1J/Darwin-64bit-.zip
+# ./get-travis-libs https://transfer.sh/EfqXS/Darwin-64bit-.zip
 
 set -e -u
 
