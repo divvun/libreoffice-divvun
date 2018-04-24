@@ -15,16 +15,16 @@ from com.sun.star.linguistic2 import XProofreader, ProofreadingResult, SinglePro
 from com.sun.star.lang import XServiceInfo, XInitialization, XServiceDisplayName
 from com.sun.star.beans import PropertyValue
 from com.sun.star.text.TextMarkupType import PROOFREADING
+
 from LODivvun.DivvunHandlePool import DivvunHandlePool
 from LODivvun.PropertyManager import PropertyManager
+from LODivvun.SettingsEventHandler import readIgnoredRules, saveIgnoredRules
 import libdivvun
 
 class GrammarChecker(unohelper.Base, XServiceInfo, XProofreader, XInitialization, XServiceDisplayName):
 
 	def __init__(self, ctx, *args):
 		logging.debug("GrammarChecker.__init__")
-		self.__ignoredErrors = set() # Grammar checker error codes that should be ignored
-		logging.debug("GrammarChecker.__init__ done")
 
 	# From XServiceInfo
 	def getImplementationName(self):
@@ -58,6 +58,11 @@ class GrammarChecker(unohelper.Base, XServiceInfo, XProofreader, XInitialization
 		result.nStartOfSentencePosition = nStartOfSentencePos
 		result.nBehindEndOfSentencePosition = nSuggestedBehindEndOfSentencePosition
 		result.xProofreader = self
+		# We read from registry on each check – it probably
+		# doesn't change most of the time, but it *can* change
+		# if user edited the plugin options, so this is at
+		# least safe:
+		ignoredRules = readIgnoredRules() # TODO: get from PropertyManager instead, see reloadDivvunSettings
 
 		DivvunHandlePool.mutex.acquire()
 		try:
@@ -91,9 +96,8 @@ class GrammarChecker(unohelper.Base, XServiceInfo, XProofreader, XInitialization
 						dError.beg, dError.end,
 						dError.rep)
 				ruleIdentifier = dError.err
-				if ruleIdentifier in self.__ignoredErrors:
-					# ignore this dError
-					logging.info("ignored")
+				if ruleIdentifier in ignoredRules:
+					logging.debug("Ignored error with rule " + ruleIdentifier)
 					continue
 
 				suggestions = dError.rep
@@ -124,10 +128,13 @@ class GrammarChecker(unohelper.Base, XServiceInfo, XProofreader, XInitialization
 			DivvunHandlePool.mutex.release()
 
 	def ignoreRule(self, ruleIdentifier, locale):
-		self.__ignoredErrors.add(ruleIdentifier)
+		logging.debug("Ignoring rule " + ruleIdentifier)
+		ignoredRules = { ruleIdentifier }.union(readIgnoredRules())
+		saveIgnoredRules(ignoredRules)
 
 	def resetIgnoreRules(self):
-		ignoredErrors.clear()
+		logging.debug("Reset ignored rules")
+		saveIgnoredRules(set())
 
 	# From XInitialization
 	def initialize(self):

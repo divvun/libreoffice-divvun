@@ -3,6 +3,7 @@
 
 ((python-mode
   (flycheck-disabled-checkers python-pylint python-flake8)
+  (python-indent-offset . 8)
   (indent-tabs-mode . t)))
 
 
