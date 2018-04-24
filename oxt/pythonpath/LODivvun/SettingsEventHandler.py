@@ -19,6 +19,7 @@ from com.sun.star.awt import XContainerWindowEventHandler
 from com.sun.star.beans import UnknownPropertyException
 from com.sun.star.beans import PropertyValue as __property__
 from com.sun.star.lang import Locale
+from com.sun.star.awt import XActionListener
 
 from LODivvun.PropertyManager import PropertyManager
 from LODivvun.DivvunHandlePool import DivvunHandlePool
@@ -85,7 +86,10 @@ are loaded (and if UI locale changes, though that's not too bad)
 		for _l, p in p_uilang:
 			toggleIds.update(p.toggleIds)
 	logging.info("KBU: prefs of checker for lang {} has toggleIds {}".format(checklang, toggleIds))
-	return toggleIds
+	# Remove empty ones, just confusing:
+	return { k:v
+		 for k,v in toggleIds.items()
+		 if k.strip() != "" and v.strip() != "" }
 
 
 def readIgnoredRules():		# type: () -> Set[str]
@@ -106,6 +110,17 @@ def saveIgnoredRules(ignoredRules):  # type: (Set[str]) -> None
 	rootView.setHierarchicalPropertyValue("gcignored", gcsettingTids)
 	logging.debug("KBU: gcignored registry set to {}".format(gcsettingTids))
 	rootView.commitChanges()
+
+def getListSelections(listM):
+	stringListValue = listM.getPropertyValue("StringItemList")
+	selectedValues = listM.getPropertyValue("SelectedItems")
+	logging.info("KBU: selectedValues {}".format(list((i, stringListValue[i]) for i in selectedValues)))
+	return {i: stringListValue[i]
+		for i in selectedValues}
+
+def getListValues(listM):
+	stringListValue = listM.getPropertyValue("StringItemList")
+	return dict(enumerate(stringListValue))
 
 
 class SettingsEventHandler(unohelper.Base, XServiceInfo, XContainerWindowEventHandler):
@@ -150,13 +165,13 @@ class SettingsEventHandler(unohelper.Base, XServiceInfo, XContainerWindowEventHa
 		logging.debug("initOptionsWindowFromRegistry()");
 		self.__initGcDropdown(window)
 
-	def __saveOptionsFromWindowToRegistry(self, window):
+	def __saveOptionsFromWindowToRegistry(self, windowC):
 		logging.debug("SettingsEventHandler.__saveOptionsFromWindowToRegistry")
-		gcsettingValue = {msg for _idx, msg in self.__getSelectedGcsetting(window)}
+		ignoredM = windowC.getControl("toggleIdsIgnore").getModel()
+		ignoredSelection = getListSelections(ignoredM).values()
 		ignoredRules = {tid
-				for (tid,msg)
-				in self.toggleIds.items()
-				if msg in gcsettingValue}
+				for (tid,msg) in self.__toggleIds.items()
+				if msg in ignoredSelection}
 		saveIgnoredRules(ignoredRules)
 
 	def __updateToggleIds(self, registryIgnored):  # type: (Set[str]) -> None
@@ -168,14 +183,13 @@ class SettingsEventHandler(unohelper.Base, XServiceInfo, XContainerWindowEventHa
 		ids that the checker can create).
 
 		"""
-		existingTids = {tid for _i,(tid,_msg) in self.__idxToToggleId.items()}
+		existingTids = self.__toggleIds.keys()
 		ignoredButNoMsg = registryIgnored - existingTids
-		nextIdx = len(self.__idxToToggleId)
-		toAdd  = { i+nextIdx: (tid, tid) for i,tid in enumerate(ignoredButNoMsg)}
-		self.__idxToToggleId.update(toAdd)
+		toAdd  = { tid: tid for tid in ignoredButNoMsg}
+		self.__toggleIds.update(toAdd)
 
 	def __initGcDropdown(self, windowC):
-		ignoredM = windowC.getControl("toggleIdsIgnored").getModel()
+		ignoreM  = windowC.getControl("toggleIdsIgnore").getModel()
 		includeM = windowC.getControl("toggleIdsInclude").getModel()
 		registryIgnored = readIgnoredRules()
 		self.__updateToggleIds(registryIgnored)
@@ -184,23 +198,25 @@ class SettingsEventHandler(unohelper.Base, XServiceInfo, XContainerWindowEventHa
 		# user to differentiate them, we can't really do
 		# anything except conflate them – unless we append the
 		# tid to make them unique?
-		ignoredMsgs = set(msg
-				  for (tid, msg)
-				  in self.toggleIds.items()
+		ignoreMsgs  = set(msg
+				  for (tid, msg) in self.__toggleIds.items()
 				  if tid in registryIgnored)
 		includeMsgs = set(msg
-				  for (tid, msg)
-				  in self.toggleIds.items()
+				  for (tid, msg) in self.__toggleIds.items()
 				  if tid not in registryIgnored)
-		uno.invoke(ignoredM, "setPropertyValue", ("StringItemList", uno.Any("[]string", tuple(ignoredMsgs))))
-		uno.invoke(includeM, "setPropertyValue", ("StringItemList", uno.Any("[]string", tuple(includeMsgs))))
+		uno.invoke(ignoreM, "setPropertyValue", ("StringItemList", uno.Any("[]string", tuple(sorted(ignoreMsgs)))))
+		uno.invoke(includeM, "setPropertyValue", ("StringItemList", uno.Any("[]string", tuple(sorted(includeMsgs)))))
+		# Enable buttons:
+		windowC.getControl("addIgnore").addActionListener(IgnoreActionListener(ignoreM, includeM))
+		windowC.getControl("addInclude").addActionListener(IncludeActionListener(ignoreM, includeM))
 
 	def __getSelectedGcsetting(self, windowContainer):
 		gcsettingProps = windowContainer.getControl("toggleIds").getModel()
 		stringListValue = gcsettingProps.getPropertyValue("StringItemList")
 		selectedValues = gcsettingProps.getPropertyValue("SelectedItems")
 		logging.info("KBU: selectedValues {}".format(list((i, stringListValue[i]) for i in selectedValues)))
-		return list((i, stringListValue[i]) for i in selectedValues)
+		return list((i, stringListValue[i])
+			    for i in selectedValues)
 
 	# def __initGcDropdownFailedAttempts(self, windowC):
 		# windowM = windowC.getModel()
@@ -251,3 +267,41 @@ class SettingsEventHandler(unohelper.Base, XServiceInfo, XContainerWindowEventHa
 
 SettingsEventHandler.IMPLEMENTATION_NAME = "no.divvun.gramcheck.SettingsEventHandlerImplementation"
 SettingsEventHandler.SUPPORTED_SERVICE_NAMES = ("no.divvun.gramcheck.SettingsEventHandlerService",)
+
+class IgnoreActionListener(unohelper.Base, XActionListener):
+	def __init__(self, ignoreM, includeM):
+		self.ignoreM = ignoreM
+		self.includeM = includeM
+		logging.info("KBU: init IgnoreActionListener")
+	def disposing(self, ev):
+		logging.info("KBU: dispose IgnoreActionListener")
+	def actionPerformed(self, ev):
+		logging.info("KBU: actionPerformed IgnoreActionListener")
+		includeSelection = getListSelections(self.includeM).values()  # to be ignored
+		ignoreMsgs =  set(includeSelection).union(getListValues(self.ignoreM).values())
+		includeMsgs = { msg
+				for msg in getListValues(self.includeM).values()
+				if msg not in includeSelection }
+		logging.info("KBU: ignoreMsgs {}".format(ignoreMsgs))
+		logging.info("KBU: tuple ignoreMsgs {}".format(tuple(ignoreMsgs)))
+		logging.info("KBU: includeMsgs {}".format(includeMsgs))
+		logging.info("KBU: tuple includeMsgs {}".format(tuple(includeMsgs)))
+		uno.invoke(self.ignoreM, "setPropertyValue", ("StringItemList", uno.Any("[]string", tuple(sorted(ignoreMsgs)))))
+		uno.invoke(self.includeM, "setPropertyValue", ("StringItemList", uno.Any("[]string", tuple(sorted(includeMsgs)))))
+
+class IncludeActionListener(unohelper.Base, XActionListener):
+	def __init__(self, ignoreM, includeM):
+		self.ignoreM = ignoreM
+		self.includeM = includeM
+		logging.info("KBU: init IncludeActionListener")
+	def disposing(self, ev):
+		logging.info("KBU: dispose IncludeActionListener")
+	def actionPerformed(self, ev):
+		logging.info("KBU: actionPerformed IncludeActionListener")
+		ignoreSelection = getListSelections(self.ignoreM).values()  # to be included
+		ignoreMsgs = { msg
+			       for msg in getListValues(self.ignoreM).values()
+			       if msg not in ignoreSelection }
+		includeMsgs = set(ignoreSelection).union(getListValues(self.includeM).values())
+		uno.invoke(self.ignoreM, "setPropertyValue", ("StringItemList", uno.Any("[]string", tuple(sorted(ignoreMsgs)))))
+		uno.invoke(self.includeM, "setPropertyValue", ("StringItemList", uno.Any("[]string", tuple(sorted(includeMsgs)))))

@@ -11,6 +11,6 @@
   <dlg:menulist dlg:id="toggleIdsInclude" dlg:tab-index="2" dlg:left="8" dlg:top="8" dlg:width="110" dlg:height="139" dlg:multiselection="true"/>
   <dlg:menulist dlg:id="toggleIdsIgnore" dlg:tab-index="3" dlg:left="142" dlg:top="8" dlg:width="110" dlg:height="139" dlg:multiselection="true"/>
   <dlg:button dlg:id="addIgnore" dlg:tab-index="4" dlg:left="124" dlg:top="52" dlg:width="11" dlg:height="11" dlg:value="→"/>
-  <dlg:button dlg:id="removeIgnore" dlg:tab-index="5" dlg:left="124" dlg:top="88" dlg:width="11" dlg:height="11" dlg:value="←"/>
+  <dlg:button dlg:id="addInclude" dlg:tab-index="5" dlg:left="124" dlg:top="88" dlg:width="11" dlg:height="11" dlg:value="←"/>
  </dlg:bulletinboard>
 </dlg:window>
