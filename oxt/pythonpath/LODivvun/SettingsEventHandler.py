@@ -111,14 +111,14 @@ def saveIgnoredRules(ignoredRules):  # type: (Set[str]) -> None
 	logging.debug("KBU: gcignored registry set to {}".format(gcsettingTids))
 	rootView.commitChanges()
 
-def getListSelections(listM):
+def getListSelections(listM):	# type: (Any) -> Dict[int, str]
 	stringListValue = listM.getPropertyValue("StringItemList")
 	selectedValues = listM.getPropertyValue("SelectedItems")
 	logging.info("KBU: selectedValues {}".format(list((i, stringListValue[i]) for i in selectedValues)))
 	return {i: stringListValue[i]
 		for i in selectedValues}
 
-def getListValues(listM):
+def getListValues(listM):	# type: (Any) -> Dict[int, str]
 	stringListValue = listM.getPropertyValue("StringItemList")
 	return dict(enumerate(stringListValue))
 
@@ -167,11 +167,11 @@ class SettingsEventHandler(unohelper.Base, XServiceInfo, XContainerWindowEventHa
 
 	def __saveOptionsFromWindowToRegistry(self, windowC):
 		logging.debug("SettingsEventHandler.__saveOptionsFromWindowToRegistry")
-		ignoredM = windowC.getControl("toggleIdsIgnore").getModel()
-		ignoredSelection = getListSelections(ignoredM).values()
+		ignoreM = windowC.getControl("toggleIdsIgnore").getModel()
+		ignoreMsgs =  getListValues(ignoreM).values()
 		ignoredRules = {tid
 				for (tid,msg) in self.__toggleIds.items()
-				if msg in ignoredSelection}
+				if msg in ignoreMsgs}
 		saveIgnoredRules(ignoredRules)
 
 	def __updateToggleIds(self, registryIgnored):  # type: (Set[str]) -> None
@@ -209,14 +209,6 @@ class SettingsEventHandler(unohelper.Base, XServiceInfo, XContainerWindowEventHa
 		# Enable buttons:
 		windowC.getControl("addIgnore").addActionListener(IgnoreActionListener(ignoreM, includeM))
 		windowC.getControl("addInclude").addActionListener(IncludeActionListener(ignoreM, includeM))
-
-	def __getSelectedGcsetting(self, windowContainer):
-		gcsettingProps = windowContainer.getControl("toggleIds").getModel()
-		stringListValue = gcsettingProps.getPropertyValue("StringItemList")
-		selectedValues = gcsettingProps.getPropertyValue("SelectedItems")
-		logging.info("KBU: selectedValues {}".format(list((i, stringListValue[i]) for i in selectedValues)))
-		return list((i, stringListValue[i])
-			    for i in selectedValues)
 
 	# def __initGcDropdownFailedAttempts(self, windowC):
 		# windowM = windowC.getModel()
