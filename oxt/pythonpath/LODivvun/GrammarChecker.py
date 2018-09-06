@@ -66,9 +66,13 @@ class GrammarChecker(unohelper.Base, XServiceInfo, XProofreader, XInitialization
 
 		DivvunHandlePool.mutex.acquire()
 		try:
-			divvun = DivvunHandlePool.getInstance().getHandle(aLocale)
+			instance = DivvunHandlePool.getInstance()
+			if instance is None:
+				logging.error("GrammarChecker.doProofreading could not initialize libdivvun!")
+				return result
+			divvun = instance.getHandle(aLocale)
 			if divvun is None:
-				logging.error("GrammarChecker.doProofreading called without initializing libdivvun")
+				logging.error("GrammarChecker.doProofreading couldn't get an instance for locale %s"%(aLocale,))
 				return result
 
 			gcErrors = []
