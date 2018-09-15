@@ -1,0 +1,32 @@
+#!/bin/bash
+
+
+set -e -u
+
+if [[ $# -ne 1 ]]; then
+    cat <<EOF
+Please supply the url to the newest travis build of libdivvun:
+
+Open https://travis-ci.org/divvun/libdivvun/ and find the newest macos
+clang build job of libdivvun,
+e.g. https://travis-ci.org/divvun/libdivvun/jobs/370142116 , scroll
+all the way down to find the transfer.sh url from that page
+(e.g. https://transfer.sh/EfqXS/Darwin-64bit-.zip) and use that as the
+first argument to this script.
+
+EOF
+    exit 1
+fi
+
+zip="$(mktemp -t libreoffice-divvun-get-travis-libs.XXXXXXXXXXX)"
+cleanup () { rm -f "${zip}"; }
+trap cleanup EXIT
+if command -V curl 2>/dev/null >/dev/null; then
+    curl --progress "$1" > "${zip}"
+else
+    wget "$1" -O "${zip}"
+fi
+unzip -d oxt "${zip}"
+
+export PATH="/Applications/LibreOffice.app/Contents/MacOS/:$PATH"
+make oxt STANDALONE_EXTENSION=1
