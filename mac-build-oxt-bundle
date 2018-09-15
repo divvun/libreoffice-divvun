@@ -3,20 +3,25 @@
 
 set -e -u
 
-if [[ $# -ne 1 ]]; then
+if [[ $# -lt 1 ]]; then
     cat <<EOF
-Please supply the url to the newest travis build of libdivvun:
+Please supply the url to the newest travis build of libdivvun, and any
+zcheck files to include as further arguments, e.g.
 
+\$ ./mac-build-oxt https://transfer.sh/yGVqZ/Darwin-64bit-.zip /usr/share/voikko/4/*.zcheck
+
+To find the libdivvun build url:
 Open https://travis-ci.org/divvun/libdivvun/ and find the newest macos
 clang build job of libdivvun,
 e.g. https://travis-ci.org/divvun/libdivvun/jobs/370142116 , scroll
 all the way down to find the transfer.sh url from that page
-(e.g. https://transfer.sh/EfqXS/Darwin-64bit-.zip) and use that as the
+(e.g. https://transfer.sh/yGVqZ/Darwin-64bit-.zip) and use that as the
 first argument to this script.
-
 EOF
     exit 1
 fi
+
+mkdir -p oxt/divvun || true
 
 zip="$(mktemp -t libreoffice-divvun-get-travis-libs.XXXXXXXXXXX)"
 cleanup () { rm -f "${zip}"; }
@@ -26,7 +31,10 @@ if command -V curl 2>/dev/null >/dev/null; then
 else
     wget "$1" -O "${zip}"
 fi
-unzip -d oxt "${zip}"
+unzip -o -d oxt "${zip}"
+
+shift
+cp "$@" oxt/divvun
 
 export PATH="/Applications/LibreOffice.app/Contents/MacOS/:$PATH"
 make oxt STANDALONE_EXTENSION=1
