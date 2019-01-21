@@ -33,7 +33,7 @@ zip="$(mktemp -t libreoffice-divvun-get-travis-libs.XXXXXXXXXXX)"
 cleanup () { rm -f "${zip}"; }
 trap cleanup EXIT
 if command -V curl 2>/dev/null >/dev/null; then
-    curl --progress "${LIBDIVVUN_MAC_RELEASE}" > "${zip}"
+    curl -L --progress "${LIBDIVVUN_MAC_RELEASE}" > "${zip}"
 else
     wget "${LIBDIVVUN_MAC_RELEASE}" -O "${zip}"
 fi
