@@ -5,17 +5,29 @@ set -e -u
 
 if [[ $# -lt 1 ]]; then
     cat <<EOF
-Please supply the url to the newest travis build of libdivvun, and any
-zcheck files to include as further arguments, e.g.
 
-\$ ./mac-build-oxt https://transfer.sh/yGVqZ/Darwin-64bit-.zip /usr/share/voikko/4/*.zcheck
+This script creates a LibreOffice .oxt file that includes all of
+libdivvun and its dependencies as well as whatever language data
+(zcheck files) you give it.
 
-To find the libdivvun build url:
-Open https://travis-ci.org/divvun/libdivvun/ and find the newest macos
-clang build job of libdivvun,
-e.g. https://travis-ci.org/divvun/libdivvun/jobs/370142116 , scroll
-all the way down to find the transfer.sh url from that page
-(e.g. https://transfer.sh/yGVqZ/Darwin-64bit-.zip) and use that as the
+The regular .oxt file made by libreoffice-divvun assumes the user has
+zcheck language data in e.g. ~/.config/voikko/4 or
+/usr/share/voikko/4, while the bundle made by this script includes the
+language data in the .oxt file itself.
+
+To run this, please supply the url to the newest travis build of
+libdivvun, and any zcheck files to include as further arguments, e.g.
+
+\$ ./mac-build-oxt https://URL-TO-NEWEST-BUILD/Darwin-64bit-.zip /usr/share/voikko/4/*.zcheck
+
+if your zcheck/divvun language data files are in /usr/share/voikko/4
+
+To find the above libdivvun build url:
+Open https://travis-ci.org/divvun/libdivvun/ and find the newest
+🍏 macos clang C++ build job of libdivvun,
+(e.g. https://travis-ci.org/divvun/libdivvun/jobs/370142116), scroll
+all the way down to find the filepush.co url from that page
+(e.g. https://filepush.co/nyCR/Darwin-64bit-.zip) and use that as the
 first argument to this script.
 EOF
     exit 1
