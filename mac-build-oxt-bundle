@@ -39,7 +39,6 @@ else
 fi
 unzip -o -d oxt "${zip}"
 
-shift
 cp "$@" oxt/divvun
 
 export PATH="/Applications/LibreOffice.app/Contents/MacOS/:$PATH"
