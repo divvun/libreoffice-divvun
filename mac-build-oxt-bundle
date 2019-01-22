@@ -61,4 +61,6 @@ esac
 export PATH="/Applications/LibreOffice.app/Contents/MacOS/:$PATH"
 make oxt STANDALONE_EXTENSION=1
 
+echo
+echo "All done:"
 ls build/divvun.oxt
