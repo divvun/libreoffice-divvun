@@ -32,17 +32,13 @@ EOF
     exit 1
 fi
 
-mkdir -p oxt/divvun || true
-
-zip="$(mktemp -t libreoffice-divvun-get-travis-libs.XXXXXXXXXXX)"
-cleanup () { rm -f "${zip}"; }
-trap cleanup EXIT
-if command -V curl 2>/dev/null >/dev/null; then
-    curl -L --progress "${LIBDIVVUN_MAC_RELEASE}" > "${zip}"
-else
-    wget "${LIBDIVVUN_MAC_RELEASE}" -O "${zip}"
+if [[ -d oxt/divvun ]]; then
+    echo "Please run"
+    echo "$ rm -rf oxt/divvun"
+    echo "before this script"
+    exit 1
 fi
-unzip -o -d oxt "${zip}"
+mkdir -p oxt/divvun
 
 case "$1" in
     --no-data)
@@ -57,6 +53,16 @@ case "$1" in
         cp "$@" oxt/divvun
         ;;
 esac
+
+zip="$(mktemp -t libreoffice-divvun-get-travis-libs.XXXXXXXXXXX)"
+cleanup () { rm -f "${zip}"; }
+trap cleanup EXIT
+if command -V curl 2>/dev/null >/dev/null; then
+    curl -L --progress "${LIBDIVVUN_MAC_RELEASE}" > "${zip}"
+else
+    wget "${LIBDIVVUN_MAC_RELEASE}" -O "${zip}"
+fi
+unzip -o -d oxt "${zip}"
 
 export PATH="/Applications/LibreOffice.app/Contents/MacOS/:$PATH"
 make oxt STANDALONE_EXTENSION=1
