@@ -5,9 +5,8 @@ set -e -u
 
 LIBDIVVUN_MAC_RELEASE=https://github.com/divvun/libdivvun/releases/download/v0.3.0/Darwin-64bit-.zip
 
-if [[ $# -lt 1 ]]; then
+if [[ $# -eq 0 ]]; then
     cat <<EOF
-
 This script creates a LibreOffice .oxt file that includes all of
 libdivvun and its dependencies as well as whatever language data
 (zcheck files) you give it.
@@ -20,9 +19,15 @@ language data in the .oxt file itself.
 To run this, please supply the zcheck files to include as arguments,
 e.g.
 
-\$ ./mac-build-oxt /usr/share/voikko/4/*.zcheck
+\$ $0 /usr/share/voikko/4/*.zcheck
 
-if your zcheck/divvun language data files are in /usr/share/voikko/4
+to make a bundle of all the zcheck divvun language data files in
+/usr/share/voikko/4.
+
+If you want to make an .oxt that has no language data, just the code
+dependencies, run:
+
+\$ $0 --no-data
 EOF
     exit 1
 fi
@@ -39,7 +44,15 @@ else
 fi
 unzip -o -d oxt "${zip}"
 
-cp "$@" oxt/divvun
+case "$1" in
+    --no-data)
+        echo "Not adding any zcheck files to the bundle"
+        ;;
+    *)
+        echo "Adding zcheck files $* to the bundle"
+        cp "$@" oxt/divvun
+        ;;
+esac
 
 export PATH="/Applications/LibreOffice.app/Contents/MacOS/:$PATH"
 make oxt STANDALONE_EXTENSION=1
