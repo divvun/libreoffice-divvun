@@ -32,11 +32,13 @@ EOF
     exit 1
 fi
 
-if [[ -d oxt/divvun ]]; then
-    echo "Please run"
-    echo "$ rm -rf oxt/divvun"
+if [[ -d oxt/divvun || -d build/oxt/divvun ]]; then
+    echo
+    echo "Warning: Found old build products, you should probably run"
+    echo "$ make clean"
     echo "before this script"
-    exit 1
+    echo
+    sleep 1
 fi
 mkdir -p oxt/divvun
 
