@@ -147,3 +147,4 @@ $(patsubst %,libreoffice-divvun-$(DIVVUN_VERSION)/%, $(sort $(SRCDIST))): \
 clean:
 	rm -rf build libreoffice-divvun-$(DIVVUN_VERSION)
 	rm -f libreoffice-divvun-$(DIVVUN_VERSION).tar.gz
+	rm -rf oxt/divvun/
