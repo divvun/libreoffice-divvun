@@ -46,10 +46,14 @@ unzip -o -d oxt "${zip}"
 
 case "$1" in
     --no-data)
+        echo
         echo "Not adding any zcheck files to the bundle"
+        echo
         ;;
     *)
+        echo
         echo "Adding zcheck files $* to the bundle"
+        echo
         cp "$@" oxt/divvun
         ;;
 esac
