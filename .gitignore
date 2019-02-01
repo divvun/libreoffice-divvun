@@ -7,3 +7,4 @@ voikko
 **/__pycache__/
 /oxt/pythonpath/_libdivvun.*.so
 /oxt/divvun/
+.DS_Store
