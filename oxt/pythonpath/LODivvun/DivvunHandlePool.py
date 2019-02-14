@@ -461,23 +461,21 @@ class DivvunHandlePool:
 		return tuple(localeList)
 
 	def getSupportedSpellingLocales(self):
-		def listLangs(path):  # TODO: get from libdivvun
+		def listLangs(path):  # TODO: get from libdivvun? Need function to check for pure speller pipelines though.
 			return []
 		res = self.__getSupportedLocalesForOperation(self.__supportedSpellingLocales, listLangs)
 		logging.info("supported spelling locales: %s", res)
 		return res
 
 	def getSupportedHyphenationLocales(self):
-		def listLangs(path):  # TODO: get from libdivvun
+		def listLangs(path):  # TODO: get from libdivvun? We don't do plain hyphenation though, might not make sense.
 			return []
 		res = self.__getSupportedLocalesForOperation(self.__supportedHyphenationLocales, listLangs)
 		logging.info("supported hyphenation locales: %s", res)
 		return res
 
 	def getSupportedGrammarLocales(self):
-		def listLangs(path):  # TODO: get from libdivvun
-			return ["se"]
-		res = self.__getSupportedLocalesForOperation(self.__supportedGrammarCheckingLocales, listLangs)
+		res = self.__getSupportedLocalesForOperation(self.__supportedGrammarCheckingLocales, libdivvun.listLangs)
 		logging.info("supported gc locales: %s", res)
 		return res
 
