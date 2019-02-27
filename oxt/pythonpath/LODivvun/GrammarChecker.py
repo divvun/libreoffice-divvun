@@ -110,15 +110,16 @@ class GrammarChecker(unohelper.Base, XServiceInfo, XProofreader, XInitialization
 				gcError.nErrorStart = startPos
 				gcError.nErrorLength = errorLength
 				gcError.nErrorType = PROOFREADING
-				comment = dError.msg
+				comment = dError.dsc
 				gcError.aShortComment = comment
 				gcError.aFullComment = comment
 				gcError.aRuleIdentifier = ruleIdentifier
 
-				detailUrl = PropertyValue()
-				detailUrl.Name = "FullCommentURL"
-				detailUrl.Value = "http://divvun.no/gchelp/" + aLocale.Language + "/" + ruleIdentifier + ".html"
-				gcError.aProperties = (detailUrl,)
+				if False:  # We are not web yet, TODO
+				    detailUrl = PropertyValue()
+				    detailUrl.Name = "FullCommentURL"
+				    detailUrl.Value = "http://divvun.no/gchelp/" + aLocale.Language + "/" + ruleIdentifier + ".html"
+				    gcError.aProperties = (detailUrl,)
 
 				# add suggestions
 				if len(suggestions) > 0:
