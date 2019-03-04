@@ -3,7 +3,7 @@
 
 set -e -u
 
-LIBDIVVUN_MAC_RELEASE=https://github.com/divvun/libdivvun/releases/download/v0.3.0/Darwin-64bit-.zip
+LIBDIVVUN_MAC_RELEASE=https://github.com/divvun/libdivvun/releases/download/v0.3.1/Darwin-64bit-.zip
 
 if [[ $# -eq 0 ]]; then
     cat <<EOF
