@@ -66,7 +66,7 @@ are loaded (and if UI locale changes, though that's not too bad)
 	pool = DivvunHandlePool.getInstance()
 	handles = pool.getOpenHandles()
 	for checklang, checker in handles.items():
-		prefs = libdivvun.prefs_bytes(checker)
+		prefs = libdivvun.prefs_bytes(checker).asdict()
 		logging.info("KBU: prefs of checker for lang {} has pref l18n langs {}".format(checklang, prefs.keys()))
 		# First add explanations from the other languages,
 		# then those of the checker, then the UI language, so
@@ -78,16 +78,16 @@ are loaded (and if UI locale changes, though that's not too bad)
 		logging.info("KBU: prefs of checker for lang {} has p_checklang {}".format(checklang, p_checklang))
 		logging.info("KBU: prefs of checker for lang {} has p_notcheckui {}".format(checklang, p_notcheckui))
 		for _l, p in p_notcheckui:
-			toggleIds.update(p.toggleIds)
+			toggleIds.update(p.toggleIds.asdict())
 		for _l, p in p_checklang:
-			toggleIds.update(p.toggleIds)
+			toggleIds.update(p.toggleIds.asdict())
 		for _l, p in p_uilang:
-			toggleIds.update(p.toggleIds)
+			toggleIds.update(p.toggleIds.asdict())
 	logging.info("KBU: prefs of checker for lang {} has toggleIds {}".format(checklang, toggleIds))
 	# Remove empty ones, just confusing:
-	return { k:v
-		 for k,v in toggleIds.items()
-		 if k.strip() != "" and v.strip() != "" }
+	return { err:msg
+		 for err,(msg, dsc) in toggleIds.items()
+		 if err.strip() != "" and msg.strip() != "" }
 
 
 def readIgnoredRules():		# type: () -> Set[str]
