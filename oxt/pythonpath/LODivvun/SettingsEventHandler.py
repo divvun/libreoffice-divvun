@@ -21,7 +21,7 @@ from com.sun.star.awt import XActionListener
 
 from LODivvun.PropertyManager import PropertyManager
 from LODivvun.DivvunHandlePool import DivvunHandlePool
-import libdivvun
+import Divvun
 
 try:
 	from typing import TypeVar, Set, List, Tuple, Dict, Callable, Any     # flake8: noqa
@@ -35,59 +35,12 @@ def __getprop__(name, value):
 	return p
 
 
-def partition(lst, pred):	# type: (List[T], Callable[[T], bool]) -> Tuple[List[T], List[T]]
-	good, bad = [], []
-	for x in lst:
-		if pred(x):
-			good.append(x)
-		else:
-			bad.append(x)
-	return good, bad
-
-
 def getUILocale():		# type: () -> Locale
 	provider = uno.getComponentContext().getValueByName("/singletons/com.sun.star.configuration.theDefaultProvider")
 	l10n = provider.createInstanceWithArguments("com.sun.star.configuration.ConfigurationAccess",
 						    (__getprop__("nodepath", "/org.openoffice.Setup/L10N"),))
 	uilocaleRaw = l10n.getByName("ooLocale") + '-'  # handle missing Country of locale 'eo'
 	return Locale(uilocaleRaw.split('-')[0], uilocaleRaw.split('-')[1], '')
-
-
-def getToggleIds():		# type: () -> Dict[str, str]
-	"""Return the toggleIds of currently opened checker handles.
-
-Don't cache this – the result may change if more handles (checkers)
-are loaded (and if UI locale changes, though that's not too bad)
-
-	"""
-	toggleIds = {}		# type: Dict[str, str]
-	uilocale = getUILocale()
-	logging.info("KBU: uilocale {}".format(uilocale))
-	pool = DivvunHandlePool.getInstance()
-	handles = pool.getOpenHandles()
-	for checklang, checker in handles.items():
-		prefs = libdivvun.prefs_bytes(checker).asdict()
-		logging.info("KBU: prefs of checker for lang {} has pref l18n langs {}".format(checklang, prefs.keys()))
-		# First add explanations from the other languages,
-		# then those of the checker, then the UI language, so
-		# the UI and checker language explanations are
-		# preferred:
-		p_uilang, p_notui = partition(prefs.items(), lambda lp: lp[0] == uilocale.Language)
-		p_checklang, p_notcheckui = partition(p_notui, lambda lp: lp[0] == checklang)
-		logging.info("KBU: prefs of checker for lang {} has p_uilang {}".format(checklang, p_uilang))
-		logging.info("KBU: prefs of checker for lang {} has p_checklang {}".format(checklang, p_checklang))
-		logging.info("KBU: prefs of checker for lang {} has p_notcheckui {}".format(checklang, p_notcheckui))
-		for _l, p in p_notcheckui:
-			toggleIds.update(p.toggleIds.asdict())
-		for _l, p in p_checklang:
-			toggleIds.update(p.toggleIds.asdict())
-		for _l, p in p_uilang:
-			toggleIds.update(p.toggleIds.asdict())
-	logging.info("KBU: prefs of checker for lang {} has toggleIds {}".format(checklang, toggleIds))
-	# Remove empty ones, just confusing:
-	return { err:msg
-		 for err,(msg, dsc) in toggleIds.items()
-		 if err.strip() != "" and msg.strip() != "" }
 
 
 def readIgnoredRules():		# type: () -> Set[str]
@@ -131,7 +84,13 @@ class SettingsEventHandler(unohelper.Base, XServiceInfo, XContainerWindowEventHa
 		# Since listbox only stores msg, not error id, we set
 		# this on init here, expecting user to restart LO if
 		# they install a new language pack
-		self.__toggleIds = getToggleIds()
+		#
+		# The result may change if more handles (checkers) are
+		# loaded (and if UI locale changes, though that's not
+		# too bad)
+		uilocale = getUILocale()
+		handles = DivvunHandlePool.getInstance().getOpenHandles()
+		self.__toggleIds = Divvun.getToggleIds(uilocale.Language, handles)
 
 	# From XServiceInfo
 	def getImplementationName(self):

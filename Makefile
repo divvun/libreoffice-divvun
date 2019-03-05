@@ -62,6 +62,7 @@ endif
 SRC_AND_DIST=config.xcu config.xcs icon.png SettingsDialog.xdl SettingsDialog_en_US.properties \
              SettingsDialog_fi_FI.properties SettingsDialog_en_US.default SettingsDialog.xcu Linguistic.xcu \
              divvun.components META-INF/manifest.xml lodivvun.py \
+             pythonpath/Divvun.py \
              pythonpath/LODivvun/__init__.py \
              pythonpath/LODivvun/LibLoad.py \
              pythonpath/LODivvun/SettingsEventHandler.py pythonpath/LODivvun/SpellChecker.py pythonpath/LODivvun/DivvunHandlePool.py \
@@ -142,6 +143,15 @@ $(patsubst %,libreoffice-divvun-$(DIVVUN_VERSION)/%, $(sort $(SRCDIST))): \
 	libreoffice-divvun-$(DIVVUN_VERSION)/%: %
 	install --mode=644 -D $^ $@
 
+
+check:
+	LD_LIBRARY_PATH="../../src/.libs" PYTHONPATH="../../python/build/lib.linux-x86_64-3.6:oxt/pythonpath" python3 -c '\
+import libdivvun;\
+s = libdivvun.ArCheckerSpec("/usr/share/voikko/4/se.zcheck");\
+smegram = s.getChecker("smegram", False);\
+import Divvun;\
+toggles = Divvun.getToggleIds("se", {"se":smegram});\
+print(list(toggles.items())[:3])'
 
 # The clean target
 clean:
