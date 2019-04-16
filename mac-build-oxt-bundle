@@ -3,7 +3,8 @@
 
 set -e -u
 
-LIBDIVVUN_MAC_RELEASE=https://github.com/divvun/libdivvun/releases/download/v0.3.3/Darwin-64bit-.zip
+latest_release=https://github.com/divvun/libdivvun/releases/download/v0.3.3/Darwin-64bit-.zip
+LIBDIVVUN_MAC_RELEASE="${LIBDIVVUN_MAC_RELEASE:-${latest_release}}"
 
 if [[ $# -eq 0 ]]; then
     cat <<EOF
@@ -28,6 +29,11 @@ If you want to make an .oxt that has no language data, just the code
 dependencies, run:
 
 \$ $0 --no-data
+
+By default fetches libdivvun and dependencies from
+${LIBDIVVUN_MAC_RELEASE}
+- export LIBDIVVUN_MAC_RELEASE to something else if you want to build
+a different build of libdivvun.
 EOF
     exit 1
 fi
