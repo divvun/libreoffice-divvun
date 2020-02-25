@@ -391,7 +391,9 @@ class DivvunHandlePool:
 				pass
 			return divvunHandle;
 		except Exception as e:
-			self.__initializationErrors[language] = e.args[0]
+			errstr = "\t".join(e.args)
+			self.__initializationErrors[language] = errstr
+			logging.error("__openHandleWithVariant got an exception: {}".format(errstr))
 			return None
 
 	def __openHandle(self, language):
