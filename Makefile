@@ -148,3 +148,4 @@ clean:
 	rm -rf build libreoffice-divvun-$(DIVVUN_VERSION)
 	rm -f libreoffice-divvun-$(DIVVUN_VERSION).tar.gz
 	rm -rf oxt/divvun/
+	rm -f oxt/pythonpath/_libdivvun.*.so
