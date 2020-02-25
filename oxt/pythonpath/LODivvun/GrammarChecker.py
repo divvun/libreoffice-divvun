@@ -73,6 +73,7 @@ class GrammarChecker(unohelper.Base, XServiceInfo, XProofreader, XInitialization
 			divvun = instance.getHandle(aLocale)
 			if divvun is None:
 				logging.error("GrammarChecker.doProofreading couldn't get an instance for locale %s"%(aLocale,))
+				logging.error("DivvunHandlePool.initializationErrors = %s"%(instance.getInitializationStatus(),))
 				return result
 
 			gcErrors = []

@@ -486,7 +486,7 @@ class DivvunHandlePool:
 			status = status + key + " "
 		status = status + "] FAILED:["
 		for key, value in self.__initializationErrors.items():
-			status = status + key + ":'" + value + "' "
+			status = status + key + ":\"" + value + "\" "
 		status = status + "]"
 		return status
 
