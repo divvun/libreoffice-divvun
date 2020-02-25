@@ -83,7 +83,7 @@ are loaded (and if UI locale changes, though that's not too bad)
 			toggleIds.update(p.toggleIds.asdict())
 		for _l, p in p_uilang:
 			toggleIds.update(p.toggleIds.asdict())
-	logging.info("KBU: prefs of checker for lang {} has toggleIds {}".format(checklang, toggleIds))
+		logging.info("KBU: prefs of checker for lang {} has toggleIds {}".format(checklang, toggleIds))
 	# Remove empty ones, just confusing:
 	return { err:msg
 		 for err,(msg, dsc) in toggleIds.items()
