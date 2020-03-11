@@ -9,12 +9,12 @@
 # the GNU General Public License Version 3 or later (the "GPL"), in which
 # case the provisions of the GPL are applicable instead of those above.
 
-import unohelper
+import unohelper 		# type:ignore
 import logging
-import uno
-from com.sun.star.lang import XServiceInfo
-from com.sun.star.awt import XContainerWindowEventHandler
-from com.sun.star.beans import UnknownPropertyException
+import uno				   # type:ignore
+from com.sun.star.lang import XServiceInfo  # type:ignore
+from com.sun.star.awt import XContainerWindowEventHandler  # type:ignore
+from com.sun.star.beans import UnknownPropertyException	 # type:ignore
 from com.sun.star.beans import PropertyValue as __property__
 from com.sun.star.lang import Locale
 from com.sun.star.awt import XActionListener

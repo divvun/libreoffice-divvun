@@ -10,13 +10,13 @@
 # case the provisions of the GPL are applicable instead of those above.
 
 import os
-import uno
+import uno 			# type:ignore
 import sys
 import traceback
 import logging
-import unohelper
-from com.sun.star.awt.MessageBoxType import ERRORBOX
-from com.sun.star.awt.MessageBoxButtons import BUTTONS_OK
+import unohelper				     # type:ignore
+from com.sun.star.awt.MessageBoxType import ERRORBOX  # type:ignore
+from com.sun.star.awt.MessageBoxButtons import BUTTONS_OK  # type:ignore
 
 from LODivvun.LibLoad import messageBox, loadLibs
 

@@ -1,4 +1,4 @@
-# Libreoffice-divvun: Linguistic extension for LibreOffice
+# Libreoffice-divvun: Linguistic extension for LibreOffice 
 # Copyright (C) 2018 Kevin Brubeck Unhammer <unhammer@fsfe.org>
 #
 # This Source Code Form is subject to the terms of the Mozilla Public License,
@@ -11,15 +11,15 @@
 
 import os
 import re
-import uno
+import uno 			# type:ignore
 import sys
 import platform
 from ctypes import CDLL
 import traceback
 import logging
-import unohelper
-from com.sun.star.awt.MessageBoxType import ERRORBOX
-from com.sun.star.awt.MessageBoxButtons import BUTTONS_OK
+import unohelper 		# type:ignore
+from com.sun.star.awt.MessageBoxType import ERRORBOX  # type:ignore
+from com.sun.star.awt.MessageBoxButtons import BUTTONS_OK  # type:ignore
 
 def messageBox(messageText):
 	ctx = uno.getComponentContext()

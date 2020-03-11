@@ -10,11 +10,11 @@
 # case the provisions of the GPL are applicable instead of those above.
 
 import logging
-import unohelper
-from com.sun.star.linguistic2 import XProofreader, ProofreadingResult, SingleProofreadingError
-from com.sun.star.lang import XServiceInfo, XInitialization, XServiceDisplayName
-from com.sun.star.beans import PropertyValue
-from com.sun.star.text.TextMarkupType import PROOFREADING
+import unohelper # type:ignore
+from com.sun.star.linguistic2 import XProofreader, ProofreadingResult, SingleProofreadingError # type:ignore
+from com.sun.star.lang import XServiceInfo, XInitialization, XServiceDisplayName # type:ignore
+from com.sun.star.beans import PropertyValue # type:ignore
+from com.sun.star.text.TextMarkupType import PROOFREADING # type:ignore
 
 from LODivvun.DivvunHandlePool import DivvunHandlePool
 from LODivvun.PropertyManager import PropertyManager

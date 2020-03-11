@@ -9,9 +9,9 @@
 # the GNU General Public License Version 3 or later (the "GPL"), in which
 # case the provisions of the GPL are applicable instead of those above.
 
-import unohelper
-from com.sun.star.linguistic2 import XSpellAlternatives
-from com.sun.star.linguistic2.SpellFailure import SPELLING_ERROR
+import unohelper					# type:ignore
+from com.sun.star.linguistic2 import XSpellAlternatives	 # type:ignore
+from com.sun.star.linguistic2.SpellFailure import SPELLING_ERROR  # type:ignore
 
 class SpellAlternatives(unohelper.Base, XSpellAlternatives):
 

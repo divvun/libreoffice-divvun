@@ -9,8 +9,8 @@
 # the GNU General Public License Version 3 or later (the "GPL"), in which
 # case the provisions of the GPL are applicable instead of those above.
 
-import unohelper
-from com.sun.star.linguistic2 import XPossibleHyphens
+import unohelper				      # type:ignore
+from com.sun.star.linguistic2 import XPossibleHyphens  # type:ignore
 
 class PossibleHyphens(unohelper.Base, XPossibleHyphens):
 

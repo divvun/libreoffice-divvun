@@ -10,9 +10,9 @@
 # case the provisions of the GPL are applicable instead of those above.
 
 import logging
-import unohelper
-from com.sun.star.linguistic2 import XSpellChecker, XLinguServiceEventBroadcaster
-from com.sun.star.lang import XServiceInfo, XInitialization, XServiceDisplayName
+import unohelper 		# type:ignore
+from com.sun.star.linguistic2 import XSpellChecker, XLinguServiceEventBroadcaster  # type:ignore
+from com.sun.star.lang import XServiceInfo, XInitialization, XServiceDisplayName  # type:ignore
 from LODivvun.DivvunHandlePool import DivvunHandlePool
 from LODivvun.SpellAlternatives import SpellAlternatives
 from LODivvun.PropertyManager import PropertyManager

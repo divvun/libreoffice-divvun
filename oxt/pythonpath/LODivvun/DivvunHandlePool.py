@@ -14,7 +14,7 @@ import os
 import platform
 from collections import defaultdict
 from threading import RLock
-from com.sun.star.lang import Locale
+from com.sun.star.lang import Locale  # type:ignore
 
 try:
 	from typing import Set, List, Tuple, Dict, Any     # flake8: noqa
@@ -339,11 +339,11 @@ class DivvunHandlePool:
 		self.__supportedGrammarCheckingLocales = []  # type: List[Locale]
 		self.__installationPath = None
 		self.__handles = {}  # type: List[libdivvun.CheckerUniquePtr]
-		self.__initializationErrors = {}
-		self.__globalBooleanOptions = {}
-		self.__globalIntegerOptions = {}
+		self.__initializationErrors = {}  # type: Dict[str, str]
+		self.__globalBooleanOptions = {}  # type: Dict[str, bool]
+		self.__globalIntegerOptions = {}  # type: Dict[str, int]
 		self.__preferredGlobalVariant = None
-		self.__bcpToOOoMap = defaultdict(list)
+		self.__bcpToOOoMap = defaultdict(list)  # type: Dict[str, List[Bcp47ToLoMapping]]
 		for m in BCP_TO_LO_MAPPING:
 			self.__bcpToOOoMap[m.bcpTag].append(m)
 		self.__bcpAdvertiseWithoutCountry = set(BCP_ADVERTISE_WITHOUT_COUNTRY)

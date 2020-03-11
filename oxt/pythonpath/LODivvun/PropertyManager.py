@@ -10,15 +10,16 @@
 # case the provisions of the GPL are applicable instead of those above.
 
 import logging
-import unohelper
+import unohelper		# type:ignore
 import os
 import sys
 import locale
-import uno
+import uno			# type:ignore
 from LODivvun.DivvunHandlePool import DivvunHandlePool
-from com.sun.star.beans import XPropertyChangeListener, UnknownPropertyException, PropertyValue
-from com.sun.star.linguistic2 import LinguServiceEvent
-from com.sun.star.linguistic2.LinguServiceEventFlags import SPELL_CORRECT_WORDS_AGAIN, SPELL_WRONG_WORDS_AGAIN, HYPHENATE_AGAIN, PROOFREAD_AGAIN
+from com.sun.star.beans import XPropertyChangeListener, UnknownPropertyException, PropertyValue	 # type:ignore
+from com.sun.star.linguistic2 import LinguServiceEvent	# type:ignore
+from com.sun.star.linguistic2.LinguServiceEventFlags import SPELL_CORRECT_WORDS_AGAIN, SPELL_WRONG_WORDS_AGAIN, HYPHENATE_AGAIN, PROOFREAD_AGAIN  # type:ignore
+from typing import Set, List, Tuple, Dict, Any     # flake8: noqa
 
 class PropertyManager(unohelper.Base, XPropertyChangeListener):
 
@@ -32,7 +33,7 @@ class PropertyManager(unohelper.Base, XPropertyChangeListener):
 		self.__hyphMinWordLength = 5
 		self.__hyphWordParts = False
 		self.__hyphUnknownWords = True
-		self.__linguEventListeners = {}
+		self.__linguEventListeners = {}	 # type: Dict[int, Any]
 		try:
 			dictVariant = self.readFromRegistry("/no.divvun.gramcheck.Config/dictionary", "variant")
 			DivvunHandlePool.getInstance().setPreferredGlobalVariant(dictVariant)

@@ -10,8 +10,8 @@
 # case the provisions of the GPL are applicable instead of those above.
 
 import logging
-import unohelper
-from com.sun.star.linguistic2 import XHyphenatedWord
+import unohelper # type:ignore
+from com.sun.star.linguistic2 import XHyphenatedWord  # type:ignore
 
 class HyphenatedWord(unohelper.Base, XHyphenatedWord):
 
