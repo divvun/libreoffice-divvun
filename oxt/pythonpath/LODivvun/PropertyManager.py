@@ -220,6 +220,7 @@ class PropertyManager(unohelper.Base, XPropertyChangeListener):
 			logging.debug("PropertyManager.sendLinguEvent sending event")
 			lstnr.processLinguServiceEvent(event)
 
+	@staticmethod
 	def getRegistryProperties(group):
 		logging.debug("PropertyManager.getRegistryProperties: " + group)
 		compContext = uno.getComponentContext()
@@ -230,14 +231,13 @@ class PropertyManager(unohelper.Base, XPropertyChangeListener):
 		pathArgument.Value = group
 		aArguments = (pathArgument,)
 		rootView = provider.createInstanceWithArguments("com.sun.star.configuration.ConfigurationUpdateAccess", aArguments)
-		return rootView;
-	getRegistryProperties = staticmethod(getRegistryProperties)
+		return rootView
 
+	@staticmethod
 	def getInstance():
 		if PropertyManager.instance is None:
 			PropertyManager.instance = PropertyManager()
 		return PropertyManager.instance
-	getInstance = staticmethod(getInstance)
 
 PropertyManager.instance = None
 PropertyManager.loadingFailed = False
