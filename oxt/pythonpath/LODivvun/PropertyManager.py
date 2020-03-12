@@ -122,7 +122,7 @@ class PropertyManager(unohelper.Base, XPropertyChangeListener):
 			self.__hyphWordParts = self.readFromRegistry("/no.divvun.gramcheck.Config/hyphenator", "hyphWordParts")
 			self.__hyphUnknownWords = self.readFromRegistry("/no.divvun.gramcheck.Config/hyphenator", "hyphUnknownWords")
 		except UnknownPropertyException as e:
-			logging.exception("PropertyManager.readDivvunSettings", e)
+			logging.exception("PropertyManager.readDivvunSettings")
 		self.__syncHyphenatorSettings()
 
 	def __getInstallationPath(self):
@@ -168,7 +168,7 @@ class PropertyManager(unohelper.Base, XPropertyChangeListener):
 				event.nEvent =  event.nEvent | SPELL_CORRECT_WORDS_AGAIN | SPELL_WRONG_WORDS_AGAIN | PROOFREAD_AGAIN
 				divvun.setPreferredGlobalVariant(dictVariant)
 		except UnknownPropertyException as e:
-			logging.exception("PropertyManager.reloadDivvunSettings", e)
+			logging.exception("PropertyManager.reloadDivvunSettings")
 		self.__syncHyphenatorSettings()
 		self.__sendLinguEvent(event)
 
@@ -176,8 +176,11 @@ class PropertyManager(unohelper.Base, XPropertyChangeListener):
 		for p in ["IsSpellWithDigits", "IsSpellUpperCase", "HyphMinLeading", "HyphMinTrailing", "HyphMinWordLength"]:
 			pValue = PropertyValue()
 			pValue.Name = p
-			pValue.Value = properties.getPropertyValue(p)
-			self.setValue(pValue)
+			try:
+				pValue.Value = properties.getPropertyValue(p)
+				self.setValue(pValue)
+			except Exception as e:
+				logging.exception("Exception setting property value '%s'", p)
 
 	def setValues(self, values):
 		for v in values:
