@@ -24,7 +24,7 @@ logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:
     datefmt='%d-%m-%Y:%H:%M:%S')
 
 if "DIVVUN_DEBUG" in os.environ:
-	logging.getLogger().setLevel(logging.DEBUG)
+    logging.getLogger().setLevel(logging.DEBUG)
 
 logging.debug("sys.path: {}".format(sys.path))
 
@@ -45,50 +45,50 @@ try:
     from LODivvun.SettingsEventHandler import SettingsEventHandler
     from LODivvun.SpellChecker import SpellChecker
 except OSError as e:
-	if not loadingFailed:
-		messageBox("OSError on loading Python libdivvun library {}: {0}".format(e))
-	loadingFailed = True
+    if not loadingFailed:
+        messageBox("OSError on loading Python libdivvun library {}: {0}".format(e))
+    loadingFailed = True
 except ModuleNotFoundError as e:
     if not loadingFailed:
         messageBox("failed to load libdivvun python module")
     loadingFailed = True
 except:
-	msg = "\n".join(["Please report this to http://divvun.no/contact.html :\n",
-			 "sys.version = " + str(sys.version),
-			 "sys.path = " + str(sys.path),
-			 "sys.prefix = " + str(sys.prefix),
-			 "sys.exec_prefix = " + str(sys.exec_prefix),
-			 "\nTraceback:",
-			 "".join(traceback.format_exception(*sys.exc_info()))])
-	logging.warn(msg)
-	if not loadingFailed:
-		messageBox(msg)
-	loadingFailed = True
+    msg = "\n".join(["Please report this to http://divvun.no/contact.html :\n",
+             "sys.version = " + str(sys.version),
+             "sys.path = " + str(sys.path),
+             "sys.prefix = " + str(sys.prefix),
+             "sys.exec_prefix = " + str(sys.exec_prefix),
+             "\nTraceback:",
+             "".join(traceback.format_exception(*sys.exc_info()))])
+    logging.warn(msg)
+    if not loadingFailed:
+        messageBox(msg)
+    loadingFailed = True
 
 # Presumably this can fail too, catch the same kinds of errors here:
 if not (loadingFailed or PropertyManager.loadingFailed):
-	try:
-		# Force initialization of property manager so that it is done before anything else.
-		PropertyManager.getInstance()
-		# name of g_ImplementationHelper is significant, Python component loader expects to find it
-		g_ImplementationHelper = unohelper.ImplementationHelper()
-		g_ImplementationHelper.addImplementation(SettingsEventHandler, \
-		                    SettingsEventHandler.IMPLEMENTATION_NAME,
-		                    SettingsEventHandler.SUPPORTED_SERVICE_NAMES,)
-		g_ImplementationHelper.addImplementation(SpellChecker, \
-		                    SpellChecker.IMPLEMENTATION_NAME,
-		                    SpellChecker.SUPPORTED_SERVICE_NAMES,)
-		g_ImplementationHelper.addImplementation(Hyphenator, \
-		                    Hyphenator.IMPLEMENTATION_NAME,
-		                    Hyphenator.SUPPORTED_SERVICE_NAMES,)
-		g_ImplementationHelper.addImplementation(GrammarChecker, \
-		                    GrammarChecker.IMPLEMENTATION_NAME,
-		                    GrammarChecker.SUPPORTED_SERVICE_NAMES,)
-	except OSError as e:
-		PropertyManager.loadingFailed = True
-		messageBox("OSError on loading PropertyManager {}: {0}".format(e))
-	except:
-		PropertyManager.loadingFailed = True
-		msg = "\n".join(traceback.format_exception(*sys.exc_info()))
-		logging.warn(msg)
-		messageBox(msg)
+    try:
+        # Force initialization of property manager so that it is done before anything else.
+        PropertyManager.getInstance()
+        # name of g_ImplementationHelper is significant, Python component loader expects to find it
+        g_ImplementationHelper = unohelper.ImplementationHelper()
+        g_ImplementationHelper.addImplementation(SettingsEventHandler, \
+                            SettingsEventHandler.IMPLEMENTATION_NAME,
+                            SettingsEventHandler.SUPPORTED_SERVICE_NAMES,)
+        g_ImplementationHelper.addImplementation(SpellChecker, \
+                            SpellChecker.IMPLEMENTATION_NAME,
+                            SpellChecker.SUPPORTED_SERVICE_NAMES,)
+        g_ImplementationHelper.addImplementation(Hyphenator, \
+                            Hyphenator.IMPLEMENTATION_NAME,
+                            Hyphenator.SUPPORTED_SERVICE_NAMES,)
+        g_ImplementationHelper.addImplementation(GrammarChecker, \
+                            GrammarChecker.IMPLEMENTATION_NAME,
+                            GrammarChecker.SUPPORTED_SERVICE_NAMES,)
+    except OSError as e:
+        PropertyManager.loadingFailed = True
+        messageBox("OSError on loading PropertyManager {}: {0}".format(e))
+    except:
+        PropertyManager.loadingFailed = True
+        msg = "\n".join(traceback.format_exception(*sys.exc_info()))
+        logging.warn(msg)
+        messageBox(msg)
