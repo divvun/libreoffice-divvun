@@ -4,22 +4,21 @@
 # This Source Code Form is subject to the terms of the Mozilla Public License,
 # v. 2.0. If a copy of the MPL was not distributed with this file, You can
 # obtain one at http://mozilla.org/MPL/2.0/.
-# 
+#
 # Alternatively, the contents of this file may be used under the terms of
 # the GNU General Public License Version 3 or later (the "GPL"), in which
 # case the provisions of the GPL are applicable instead of those above.
 
+import logging
 import os
-import uno 			# type:ignore
 import sys
 import traceback
-import logging
-import unohelper				     # type:ignore
-from com.sun.star.awt.MessageBoxType import ERRORBOX  # type:ignore
+
+import uno  # type:ignore
+import unohelper  # type:ignore
 from com.sun.star.awt.MessageBoxButtons import BUTTONS_OK  # type:ignore
-
-from LODivvun.LibLoad import messageBox, loadLibs
-
+from com.sun.star.awt.MessageBoxType import ERRORBOX  # type:ignore
+from LODivvun.LibLoad import loadLibs, messageBox
 
 logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
     datefmt='%d-%m-%Y:%H:%M:%S')
@@ -40,15 +39,19 @@ loadingFailed = False
 try:
     import libdivvun
     logging.debug("libdivvun.searchPaths(): {}".format(list(libdivvun.searchPaths())))
+    from LODivvun.GrammarChecker import GrammarChecker
+    from LODivvun.Hyphenator import Hyphenator
     from LODivvun.PropertyManager import PropertyManager
     from LODivvun.SettingsEventHandler import SettingsEventHandler
     from LODivvun.SpellChecker import SpellChecker
-    from LODivvun.Hyphenator import Hyphenator
-    from LODivvun.GrammarChecker import GrammarChecker
 except OSError as e:
 	if not loadingFailed:
 		messageBox("OSError on loading Python libdivvun library {}: {0}".format(e))
 	loadingFailed = True
+except ModuleNotFoundError as e:
+    if not loadingFailed:
+        messageBox("failed to load libdivvun python module")
+    loadingFailed = True
 except:
 	msg = "\n".join(["Please report this to http://divvun.no/contact.html :\n",
 			 "sys.version = " + str(sys.version),
